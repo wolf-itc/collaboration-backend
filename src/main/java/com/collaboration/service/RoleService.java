@@ -79,7 +79,7 @@ public class RoleService {
     return convertToDTO(role);
   }
 
-  public List<RoleDTO> getRolesByOrgaId(final long orgaid) {
+  public List<RoleDTO> getAllRolesByOrgaId(final long orgaid) {
     return roleRepository.findByOrgaid(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
   }
 

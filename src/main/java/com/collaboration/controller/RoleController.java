@@ -195,7 +195,7 @@ public class RoleController {
       // Check access
       permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_ROLE, null);
       
-      List<RoleDTO> roles = roleService.getRolesByOrgaId(orgaid);
+      List<RoleDTO> roles = roleService.getAllRolesByOrgaId(orgaid);
       log.info("Roles retrieved for orgaId: {}", orgaid);
 
       // Remove the organization prefix

@@ -23,4 +23,6 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
   // For create operations
   @Query("SELECT p FROM Permission p WHERE p.itemtypeid = :itemtypeid AND  p.itemid IS NULL AND p.roleid IN :roleids")
   public List<Permission> findByAndItemtypeidAndRoleidIn(final long itemtypeid, final List<Long> roleids);
+
+//  List<Permission> findByOrgaid(final long orgaid);
 }

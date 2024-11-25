@@ -3,14 +3,10 @@
 .settings
 dbbackup
 Doku
-!Doku/erd.obd
-!Doku/erd.png
 frontend
 letsencrypt
 pics_design
 src/main/resources
-!src/main/resources/db
-!src/main/resources/static
 target
 .classpath
 .project

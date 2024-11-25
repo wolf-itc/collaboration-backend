@@ -1,0 +1,32 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+   http://www.liquibase.org/xml/ns/dbchangelog
+   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet author="mw" id="mw-002">
+        <createTable tableName="users_hilfmir">
+            <column name="id" type="INT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="picture" type="MEDIUMBLOB" />
+            <column name="avatar" type="MEDIUMBLOB" />
+        </createTable>
+    </changeSet>
+
+		<changeSet author="mw" id="mw-002">
+		    <createTable tableName="users_hilfmir">
+		        <column name="id" type="INT">
+		            <constraints nullable="false" primaryKey="true"/>
+		        </column>
+		        <column name="objtype" type="INT" />
+		        <column name="objid" type="INT" />
+		        <column name="role" type="INT" />
+		        <column name="permission" type="INT" />
+		    </createTable>
+		</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,1980 @@
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+	<changeSet author="mw" id="mw-01-001">
+		<createTable tableName="users">
+			<column autoIncrement="true" name="id" type="SERIAL">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="username" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="password" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+			<column name="enabled" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="lastname" type="VARCHAR(50)" />
+			<column name="firstname" type="VARCHAR(50)" />
+			<column name="email" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+			<column name="postcode" type="VARCHAR(20)" />
+			<column name="city" type="VARCHAR(100)" />
+			<column name="address" type="VARCHAR(200)" />
+			<column name="telephone" type="VARCHAR(50)" />
+			<column name="mobile" type="VARCHAR(50)" />
+			<column name="idcardnumber" type="VARCHAR(50)" />
+			<column name="lastlogin" type="TIMESTAMP" />
+			<column name="lastfaillogin" type="TIMESTAMP" />
+			<column name="faillogincount" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="lastnotifications" type="TIMESTAMP" />
+			<column name="shownotifications" type="CHAR(1)">
+				<constraints nullable="false" />
+			</column>
+			<column name="showintro" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="showhelp" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="showclearname" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="showcontact" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="language" type="CHAR(5)">
+				<constraints nullable="false" />
+			</column>
+			<column name="activationkey" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint
+      constraintName="uc_users" 
+		  tableName="users"
+			columnNames="username" 
+		/>
+		<addUniqueConstraint 
+      constraintName="uc_email" 
+		  tableName="users"
+			columnNames="email" 
+		/>
+    <addUniqueConstraint 
+      constraintName="uc_activationkey" 
+      tableName="users"
+      columnNames="activationkey" 
+    />
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-002">
+		<createTable tableName="authorities">
+			<column autoIncrement="true" name="id" type="SERIAL">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="userid" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="username" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="authority" type="VARCHAR(50)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint 
+      constraintName="uc_authority" 
+		  tableName="authorities"
+			columnNames="username, authority" 
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_authorities_users" 
+			baseTableName="authorities" baseColumnNames="userid" 
+			referencedTableName="users" referencedColumnNames="id"
+		/>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-003">
+		<createTable tableName="organization">
+			<column autoIncrement="true" name="id" type="SERIAL">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="name" type="VARCHAR(300)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(2000)" />
+			<column name="logo" type="BYTEA" />
+			<column name="prefix" type="VARCHAR(20)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint 
+      constraintName="uc_organization" 
+		  tableName="organization"
+			columnNames="name" 
+		/>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-004">
+		<sql>
+			INSERT INTO organization VALUES (1, 'Yare', 'Real Collaboration', null,	null);
+		</sql>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-005">
+		<createTable tableName="itemtype">
+			<column autoIncrement="true" name="id" type="SERIAL">
+				<constraints nullable="false" primaryKey="true" />
+			</column>
+			<column name="orgaid" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="name" type="VARCHAR(200)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint 
+      constraintName="uc_itemtype" 
+		  tableName="itemtype"
+			columnNames="name" 
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_itemtype_orgaid" 
+			baseTableName="itemtype" baseColumnNames="orgaid" 
+			referencedTableName="organization" referencedColumnNames="id"
+	  />
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-006">
+		<sql>
+      INSERT INTO itemtype VALUES (1, 1, 'USER');
+			INSERT INTO itemtype VALUES (2, 1, 'ROLE');
+			INSERT INTO itemtype VALUES (3, 1, 'PERMISSION');
+			INSERT INTO itemtype VALUES (4, 1, 'AUTHORITY');
+      INSERT INTO itemtype VALUES (5, 1, 'NONUSER');
+      INSERT INTO itemtype VALUES (6, 1, 'ITEMTYPE');
+			INSERT INTO itemtype VALUES (7, 1, 'DOCUMENT');
+			INSERT INTO itemtype VALUES (10, 1, 'Local/Regional Group');
+			INSERT INTO itemtype VALUES (11, 1, 'Country Group');
+			INSERT INTO itemtype VALUES (12, 1, 'Federal Group');
+			INSERT INTO itemtype VALUES (13, 1, 'Topic Group');
+			INSERT INTO itemtype VALUES (100, 1, 'Group meeting');
+			INSERT INTO itemtype VALUES (101, 1, 'General Assembly');
+			INSERT INTO itemtype VALUES (102, 1, 'Lecture');
+			INSERT INTO itemtype VALUES (103, 1, 'Panel Discussion');
+			INSERT INTO itemtype VALUES (104, 1, 'Event');
+			INSERT INTO itemtype VALUES (105, 1, 'March');
+			INSERT INTO itemtype VALUES (106, 1, 'Public Meeting');
+			INSERT INTO itemtype VALUES (107, 1, 'Campaign Action');
+			INSERT INTO itemtype VALUES (108, 1, 'Congress');
+			INSERT INTO itemtype VALUES (199, 1, 'Miscellaneous');
+			INSERT INTO itemtype VALUES (200, 1, 'Organizer');
+			INSERT INTO itemtype VALUES (300, 1, 'Campaign');
+			SELECT setval('itemtype_id_seq', 1000, false);
+		</sql>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-007">
+		<createTable tableName="role">
+      <column autoIncrement="true" name="id" type="SERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+			<column name="orgaid" type="int">
+				<constraints nullable="false" />
+			</column>
+			<column name="rolename" type="varchar(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint 
+      constraintName="uc_role" 
+		  tableName="role"
+			columnNames="rolename" 
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_role_organization" 
+			baseTableName="role" baseColumnNames="orgaid" 
+			referencedTableName="organization" referencedColumnNames="id"
+		/>
+	</changeSet>
+
+  <changeSet author="mw" id="mw-01-008">
+    <sql>
+      INSERT INTO role VALUES (1, 1, 'USER');
+      INSERT INTO role VALUES (2, 1, 'ADMIN');
+      INSERT INTO role VALUES (3, 1, 'DEVELOPER');
+      SELECT setval('role_id_seq', 1000, false);
+    </sql>
+  </changeSet>
+
+	<changeSet author="mw" id="mw-01-009">
+		<createTable tableName="theme">
+      <column autoIncrement="true" name="id" type="BIGSERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+			<column name="name" type="VARCHAR(300)">
+				<constraints nullable="false" />
+			</column>
+			<column name="description" type="VARCHAR(2000)" />
+			<column name="color" type="CHAR(6)" />
+		</createTable>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-010">
+		<createTable tableName="item">
+      <column autoIncrement="true" name="id" type="BIGSERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+			<column name="itid" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="userornonuserid" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addForeignKeyConstraint
+			constraintName="fk_item_itemtype" 
+			baseTableName="item" baseColumnNames="itid" 
+			referencedTableName="itemtype" referencedColumnNames="id"
+		/>
+	</changeSet>
+
+	<changeSet author="mw" id="mw-01-011">
+		<createTable tableName="permission">
+      <column autoIncrement="true" name="id" type="SERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+			<column name="itemtypeid" type="INT">
+				<constraints nullable="false" />
+			</column>
+			<column name="itemid" type="INT"/>
+			<column name="roleid" type="INT">
+        <constraints nullable="false" />
+      </column>
+			<column name="permission" type="VARCHAR(100)">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="permission"
+      constraintName="uc_permission" 
+			columnNames="itemtypeid, itemid, roleid, permission"
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_permission_itemtype" 
+			baseTableName="permission" baseColumnNames="itemtypeid" 
+			referencedColumnNames="id" referencedTableName="itemtype" 
+		/>
+		<addForeignKeyConstraint
+			constraintName="fk_permission_item" 
+			baseTableName="permission" baseColumnNames="itemid" 
+			referencedColumnNames="id" referencedTableName="item" 
+	  />
+		<addForeignKeyConstraint
+			constraintName="fk_permission_role" 
+			baseTableName="permission" baseColumnNames="roleid" 
+			referencedColumnNames="id" referencedTableName="role" 
+		/>
+	</changeSet>
+
+  <changeSet author="mw" id="mw-01-012">
+    <sql>
+      INSERT INTO permission VALUES (1, 2, null, 1, 'CRUD');
+      SELECT setval('permission_id_seq', 1000, false);
+    </sql>
+  </changeSet>
+
+	<changeSet author="mw" id="mw-01-013">
+		<createTable tableName="nonuser">
+      <column autoIncrement="true" name="id" type="SERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+			<column name="name" type="VARCHAR(500)">
+				<constraints nullable="false" />
+			</column>
+			<column name="content" type="VARCHAR(50000)">
+				<constraints nullable="false" />
+			</column>
+			<column name="createdbyid" type="INT">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+  <changeSet author="mw" id="mw-01-014">
+    <createTable tableName="item2orga">
+      <column autoIncrement="true" name="id" type="SERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="itemid" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="orgaid" type="int">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addUniqueConstraint 
+       constraintName="uc_item2orga" 
+      tableName="item2orga"
+      columnNames="itemid, orgaid" 
+    />
+    <addForeignKeyConstraint
+      constraintName="fk_item2orga_item" 
+      baseTableName="item2orga" baseColumnNames="itemid" 
+      referencedTableName="item" referencedColumnNames="id"  
+    />
+     <addForeignKeyConstraint
+       constraintName="fk_item2orga_orga" 
+       baseTableName="item2orga" baseColumnNames="orgaid" 
+       referencedTableName="organization" referencedColumnNames="id"  
+     />
+  </changeSet>
+  
+  <changeSet author="mw" id="mw-01-015">
+    <createTable tableName="item2role">
+      <column autoIncrement="true" name="id" type="SERIAL">
+        <constraints nullable="false" primaryKey="true" />
+      </column>
+      <column name="itemid" type="int">
+        <constraints nullable="false" />
+      </column>
+      <column name="roleid" type="int">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+    <addUniqueConstraint 
+       constraintName="uc_item2role" 
+      tableName="item2role"
+      columnNames="itemid, roleid" 
+    />
+    <addForeignKeyConstraint
+      constraintName="fk_item2role_item" 
+      baseTableName="item2role" baseColumnNames="itemid" 
+      referencedTableName="item" referencedColumnNames="id"  
+    />
+     <addForeignKeyConstraint
+       constraintName="fk_item2role_orga" 
+       baseTableName="item2role" baseColumnNames="roleid" 
+       referencedTableName="role" referencedColumnNames="id"  
+     />
+  </changeSet>
+  
+	<!-- 
+<changeSet author="mw" id="mw-01-010">
+  <createTable tableName="vertyp">
+    <column autoIncrement="true" name="vtid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-011">
+  <createTable tableName="verby">
+    <column autoIncrement="true" 
+    name="vbid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="verbyuserid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="vtid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="negativ" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="pnhash" type="CHAR(32)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-012">
+  <createTable tableName="abstimmung">
+    <column autoIncrement="true" name="absid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="ebene" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erstellerid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="iid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(2000)" />
+    <column name="apid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="startzeit" 
+    type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+    <column name="endzeit" type="TIMESTAMP" />
+    <column name="absmodus" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="quorum" 
+    type="NUMERIC(5,2)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="subgruppen" 
+    type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="preview" 
+    type="CHAR(1)">
+      <constraints nullable="false" />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-013">
+  <createTable tableName="abstimmungsoption">
+    <column autoIncrement="true" name="optid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="absid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(2000)" 
+    />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-014">
+  <createTable 
+    tableName="abstimmungsphase">
+    <column autoIncrement="true" name="apid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="beschreibung" 
+    type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-015">
+  <sql> INSERT INTO abstimmungsphase 
+    VALUES (1, 'Noch nicht gestartet'); INSERT INTO abstimmungsphase VALUES (2, 
+    'Laufend'); INSERT INTO abstimmungsphase VALUES (3, 'Beendet'); INSERT INTO 
+    abstimmungsphase VALUES (4, 'Erledigt'); </sql>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-016">
+  <createTable tableName="abstimmungsstimme">
+    <column name="absid" 
+    type="INT" >
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_abstimmungsstimme"/>
+    </column>
+    <column name="userid" type="INT" >
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_abstimmungsstimme"/>
+    </column>
+    <column 
+    name="optid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_abstimmungsstimme"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-017">
+  <createTable tableName="admin">
+    <column 
+    autoIncrement="true" name="aid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="arid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="adminid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="madebyid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="iid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="legitimiert" type="CHAR(1)">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="anmerkung" type="VARCHAR(1000)" 
+    />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-018">
+  <createTable 
+    tableName="adminrole">
+    <column autoIncrement="true" name="arid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="adminrole" 
+    type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-019">
+  <sql> INSERT INTO adminrole 
+    VALUES (1, 'OGAdmin'); INSERT INTO adminrole VALUES (2, 'LGAdmin'); INSERT 
+    INTO adminrole VALUES (3, 'BGAdmin'); INSERT INTO adminrole VALUES (100, 
+    'OGAdmin-Temp'); INSERT INTO adminrole VALUES (101, 'LGAdmin-Temp'); INSERT 
+    INTO adminrole VALUES (102, 'BGAdmin-Temp'); </sql>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-020">
+  <createTable tableName="adresse">
+    <column autoIncrement="true" 
+    name="adrid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="ErstellerId" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)" />
+    <column name="blid" 
+    type="INT" />
+    <column name="plz" type="CHAR(5)" />
+    <column name="ort" type="VARCHAR(100)" 
+    />
+    <column name="adresse" type="VARCHAR(200)" />
+    <column name="gpslaenge" 
+    type="VARCHAR(15)" />
+    <column name="gpsbreite" type="VARCHAR(15)" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-021">
+  <createTable tableName="antithese">
+    <column autoIncrement="true" name="atid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="prothsid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="contrathsid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-022">
+  <createTable tableName="bundesland">
+    <column autoIncrement="true" 
+    name="blid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="abbrev" type="CHAR(2)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bundeland" type="VARCHAR(200)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-023">
+  <sql> INSERT INTO bundesland VALUES ( 1, 'BW', 'Baden-Württemberg'); INSERT 
+    INTO bundesland VALUES ( 2, 'BY', 'Bayern'); INSERT INTO bundesland VALUES 
+    ( 3, 'BE', 'Berlin'); INSERT INTO bundesland VALUES ( 4, 'BB', 'Brandenburg'); 
+    INSERT INTO bundesland VALUES ( 5, 'HB', 'Bremen'); INSERT INTO bundesland 
+    VALUES ( 6, 'HH', 'Hamburg'); INSERT INTO bundesland VALUES ( 7, 'HE', 'Hessen'); 
+    INSERT INTO bundesland VALUES ( 8, 'MV', 'Mecklenburg-Vorpommern'); INSERT 
+    INTO bundesland VALUES ( 9, 'NI', 'Niedersachsen'); INSERT INTO bundesland 
+    VALUES (10, 'NW', 'Nordrhein-Westfalen'); INSERT INTO bundesland VALUES (11, 
+    'RP', 'Rheinland-Pfalz'); INSERT INTO bundesland VALUES (12, 'SL', 'Saarland'); 
+    INSERT INTO bundesland VALUES (13, 'SN', 'Sachsen'); INSERT INTO bundesland 
+    VALUES (14, 'ST', 'Sachsen-Anhalt'); INSERT INTO bundesland VALUES (15, 'SH', 
+    'Schleswig-Holstein'); INSERT INTO bundesland VALUES (16, 'TH', 'Thüringen'); 
+    </sql>
+</changeSet>
+<changeSet author="mw" id="mw-024">
+  <createTable tableName="collection">
+    <column autoIncrement="true" name="collid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="iid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(1000)" 
+    />
+    <column name="visibility" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-025">
+  <createTable tableName="demoanmeldung">
+    <column autoIncrement="true" name="itid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="regtext" type="VARCHAR(2000)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-026">
+  <createTable tableName="dokument">
+    <column autoIncrement="true" name="dokid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="iid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="dokname" type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="dokument" type="BYTEA">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erstellerid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erstelltam" type="TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+    <column name="sichtbarkeit" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(1000)">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="collid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="quelle" type="VARCHAR(500)">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="preview" type="BYTEA" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-027">
+  <createTable tableName="dsgvo">
+    <column autoIncrement="true" name="adminid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="informiertdurchid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="informiertam" type="TIMESTAMP" 
+    defaultValueComputed="CURRENT_TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+    <column name="filedata" type="BYTEA">
+      <constraints nullable="false"/>
+    </column>
+    <column name="filename" type="VARCHAR(1000)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-028">
+  <createTable tableName="fakt">
+    <column autoIncrement="true" name="adminid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="fktid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="thsid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="dokid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(1000)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-029">
+  <createTable tableName="helptext">
+    <column autoIncrement="true" name="htid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="helptextname" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="helptext" type="VARCHAR(30000)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-030">
+  <sql> INSERT INTO helptext VALUES (1, 'NeueNachrichten', 'Wenn Du per E-Mail 
+    darüber informiert werden möchtest, ob neue Nachrichten für Dich eingegangen 
+    sind, kannst Du hier festlegen wie oft dein Posteingang auf neue Nachrichten 
+    überprüft werden soll.\nDas können neue Nachrichten an Dich persönlich oder 
+    auch neue Nachrichten an eine Gruppe sein bei der Du aktiv bist. \nWenn in 
+    einer Deiner Gruppen neue Nachrichten vorliegen, dann wird die Gruppenbezeichnung 
+    ''rot unterlegt'' angezeigt.\nMöchtest Du keine Benachrichtigung, dann wähle 
+    aus dem Drop-down-Menue ''nicht informieren''.'); INSERT INTO helptext VALUES 
+    (2, 'CollaborationSelection', 'Hilfetext ''CollaborationSelection''\n\nHier 
+    kann jede Gruppe, Bewegung, Organisation oder sonstige Community bestimmen 
+    mit wem sie zu Themen, Aktionen und Kampagnen kooperieren möchte. \nGenauso 
+    auch kann hier die Zusammenarbeit mit bestimmten Gruppierungen ausgeschlossen 
+    werden.'); INSERT INTO helptext VALUES (3, 'OrganisationsAnzeige', 'Wenn 
+    du darüber informiert sein möchtest, wo welche Gruppen sich treffen und ansässig 
+    sind, kannst du die entsprechenden Gruppen durch ''anhaken'' hier zur Anzeige 
+    in der MAP aktivieren.'); INSERT INTO helptext VALUES (4, 'DeineNachrichten', 
+    'In diesem Bereich werden Deine persönlichen Ein- und Ausgangsnachrichten 
+    angezeigt. Neue Nachrichten stehen immer ganz oben. Die Anzeige funktioniert 
+    also chronologisch. \nMöchtest Du eine persönliche Nachricht an einen anderen 
+    Nutzer schreiben, benötigst Du seinen Nickname (Spitznamen). Um diesen zu 
+    suchen, klicke unter MITMACHEN auf Mitglieder. Gib den Nickname ein und lass 
+    danach suchen.\nMöchtest Du auf eine eingegangene Nachricht antworten, klicke 
+    dazu auf die am Ende der Nachricht verfügbare Comic-Sprechblase. Es öffnet 
+    sich dann ein neues Dialogfeld zur Erfassung Deiner Nachricht.\nEingangsnachrichten 
+    und Ausgangsnachrichten sind farblich verschieden unterlegt. \nDu kannst 
+    auch bereits versendete Nachrichten später noch verändern, also noch etwas 
+    hinzufügen oder etwas aus dem Text streichen. Wenn Du das tust, erhält die 
+    Nachricht einen Modifizierungshinweis mit dem Änderungsdatum im Kopfbereich 
+    der Nachricht.\nDu kannst Deine eigenen Nachrichten löschen, wenn Du in der 
+    Nachricht rechts unten auf das Kreissymbol mit dem ''X'' klickst.\nWenn Du 
+    willst, kannst Du Deiner Nachricht auch ein Emoji hinzufügen. Du findest 
+    die Auswahl dazu am Fuß des Nachrichtenfeldes. Klicke dazu auf den ''grünen'' 
+    Button mit der Aufschrift EMOJI.'); INSERT INTO helptext VALUES (5, 'Gruppenforum', 
+    'Hilfetext Chat ''Gruppenforum''\n\nEs können mit den Berechtigungen in dieser 
+    Gruppe beliebig viele Chats (\"neues Thema\" oben rechts) in jeder Themen-, 
+    Orts-, Regional- usw Gruppe angelegt werden.\nIn jedem einzelnen Chat kann 
+    festgelegt werden wie der Zugriff geregelt ist:\nFür wen soll das Thema im 
+    Forum sichtbar sein?\nÖffentlich für jeden\nNur angemeldete Nutzer\nNur verifizierte 
+    Nutzer\nNur Gruppenmitglieder\nNur verifizierte Gruppenmitglieder'); INSERT 
+    INTO helptext VALUES (6, 'Gruppenkontakte', 'Hilfetext \\''Gruppenkontakte\\'' 
+    \n\nUnter diesem Punkt werden alle vorhandenen externen Kommunikationswege 
+    zusammengetragen. Chats (MM, slack, rockezchat ...), Ansprechpartner, Social 
+    Media Plattformen'); INSERT INTO helptext VALUES (7, 'Gruppenunterlagen', 
+    'Hilfetext \\''Gruppenunterlagen\\'' \n\nAlle gewünschten und erforderlichen 
+    Unterlagen werden hier abgelegt und Links aufgeführt'); INSERT INTO helptext 
+    VALUES (8, 'DeineGruppen', 'Hier erhältst Du einen Überblick über alle Gruppen, 
+    bei denen Du als Teilnehmer dabei bist (für Dich freigegebene Gruppen). Das 
+    können organisatorische Gruppen oder auch Themengruppen sein.'); INSERT INTO 
+    helptext VALUES (9, 'NachrichtAnMehrereGruppen', 'Du kannst hier eine Nachricht 
+    an alle Teilnehmer einer Gruppe senden. Voraussetzung ist, das Du dieser 
+    Gruppe angehörst. Bist Du in mehreren Gruppen vertreten, so werden alle Deine 
+    zugewiesenen Gruppen angezeigt. Wähle dann die Gruppe aus, deren Teilnehmer 
+    Deine Nachricht erhalten sollen und klicke auf den Button ''fertig''. Es 
+    können, wenn angezeigt, auch mehrere Gruppen ausgewählt werden. \nAnschliessend 
+    kannst Du über den Button ''Neue Nachricht schreiben '' die Nachricht erstellen.'); 
+    INSERT INTO helptext VALUES (10, 'KampagnenDokumente', 'Mitfahrgelegenheit, 
+    Flyer, Plakate, Aufrufe, Presseartikel, Aktionsvideo'); INSERT INTO helptext 
+    VALUES (11, 'WahlQuorum', 'Unter Quorum versteht man die Anzahl der Stimmen, 
+    die erreicht sein muss, damit eine Wahl oder Abstimmung Gültigkeit erlangt. 
+    Gib eine Quote in Prozent ein.'); INSERT INTO helptext VALUES (12, 'Gruppenkopf', 
+    'Hier kannst Du in die Seitendarstellung der neuen Gruppe einen Text, ein 
+    Symbol oder Logo aufnehmen. Die Größendarstellung kann auch mittels Eingabe 
+    von HTML-Code erfolgen. Das Logo/Foto selbst wird später in der Unterlagen-Sammlung 
+    der Gruppe als .png-Datei eingefügt.'); INSERT INTO helptext VALUES (13, 
+    'Gruppenorganisation', 'Wähle aus dem Drop-down-Menü die Organisation aus, 
+    mit deren Inhalten Du Dich identifizierst bzw. zu der Du gehörst. \nWenn 
+    du zu keiner der angezeigten Organisationen gehörst, wähle ''Unabhängige 
+    Gruppen''. Hier können sich Menschen zusammenfinden, die sich (noch) nicht 
+    für die Aufnahme in eine Bewegung entscheiden können, aber trotzdem an einem 
+    Thema oder in einer Ortsgruppe mitarbeiten wollen.'); INSERT INTO helptext 
+    VALUES (14, 'WissenUndFakten', 'Wenn Ihr hier ein neues Thema einstellen 
+    möchtet, gibt es dafür eine Voraussetzung:\nIhr müsste Admin einer Themengruppe 
+    sein, die sich mit diesem Thema beschäftigt.'); INSERT INTO helptext VALUES 
+    (15, 'WissenUndFaktenThemengruppen', 'Diese Haupt-Übersicht ist nach Themengruppen 
+    gegliedert. Wenn Ihr die Themen in einem Bereich sehen möchtet, klappt den 
+    entsprechenden Themenbereich auf.'); INSERT INTO helptext VALUES (16, 'WissenUndFaktenThemen', 
+    'Innerhalb eines Themenbereichs seht Ihr die bisher in diesem Bereich angelegten 
+    Themen. Jedes Thema wurde vom Admin einer entsprechenden Themengruppe erstellt.'); 
+    INSERT INTO helptext VALUES (17, 'WissenUndFaktenThese', 'Innerhalb eines 
+    Themas können nun Themenpunkte erstellt werden. Jeder Themenpunkt wird dann 
+    als Kachel dargestellt, kann Text und Dokumente enthalten und zeigt Infos 
+    über den Ersteller an.\nDiese Themenpunkte können auch als ''Aussage'' und 
+    ''Gegenaussage'' (These/Antithese) erstellt werden, damit gegensätzliche 
+    Meinungen und Ansichten aufbereitet werden können.'); INSERT INTO helptext 
+    VALUES (18, 'Gruppenwahlen', 'Gruppen-Admins-/Delis können hier Wahlen mit 
+    vielen Funktionen bis hin zu einem Quorum anlegen'); </sql>
+</changeSet>
+<changeSet author="mw" id="mw-031">
+  <createTable tableName="item2landkreis">
+    <column name="iid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_item2landkreis" />
+    </column>
+    <column name="lkid" type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_item2landkreis" 
+    />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-032">
+  <createTable tableName="item2landkreis_deleted">
+    <column name="iid" type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_item2landkreis_deleted" 
+    />
+    </column>
+    <column name="lkid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_item2landkreis_deleted" />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-033">
+  <createTable 
+    tableName="item2orga">
+    <column name="iid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_item2orga" />
+    </column>
+    <column name="orgaid" 
+    type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_item2orga" 
+    />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-034">
+  <createTable tableName="kampagne">
+    <column autoIncrement="true" name="kmpid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true" />
+    </column>
+    <column name="bezeichnung" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(50000)">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="gestartet" type="TIMESTAMP">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="beendet" type="TIMESTAMP">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="deldatum" type="TIMESTAMP">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="orgaid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-035">
+  <createTable tableName="kampagne2owner">
+    <column name="kmpid" 
+    type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_kampagne2owner" 
+    />
+    </column>
+    <column name="ownerid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_kampagne2owner" />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-036">
+  <createTable tableName="kandidat">
+    <column autoIncrement="true" name="kid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="wid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="werbung" type="VARCHAR(2000)" 
+    />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-037">
+  <createTable 
+    tableName="kontakt">
+    <column autoIncrement="true" name="kid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="ktid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="iid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="kontaktdaten" 
+    type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="itid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="visibility" 
+    type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-038">
+  <createTable tableName="kontakttyp">
+    <column autoIncrement="true" name="ktid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(200)" 
+    />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-039">
+  <sql> 
+    INSERT INTO kontakttyp VALUES (1, 'Web'); INSERT INTO kontakttyp VALUES (2, 
+    'Facebook-Seite'); INSERT INTO kontakttyp VALUES (3, 'Facebook-Gruppe'); 
+    INSERT INTO kontakttyp VALUES (4, 'eMail'); INSERT INTO kontakttyp VALUES 
+    (5, 'Ansprechperson'); INSERT INTO kontakttyp VALUES (6, 'PLZ'); INSERT INTO 
+    kontakttyp VALUES (9, 'Telefon'); INSERT INTO kontakttyp VALUES (7, 'Twitter'); 
+    INSERT INTO kontakttyp VALUES (8, 'Youtube'); INSERT INTO kontakttyp VALUES 
+    (10, 'Mobil'); INSERT INTO kontakttyp VALUES (11, 'Verein'); INSERT INTO 
+    kontakttyp VALUES (12, 'Social-Media'); INSERT INTO kontakttyp VALUES (13, 
+    'Slack'); INSERT INTO kontakttyp VALUES (14, 'Forum'); INSERT INTO kontakttyp 
+    VALUES (15, 'Mattermost'); INSERT INTO kontakttyp VALUES (16, 'Gruppenchat'); 
+    INSERT INTO kontakttyp VALUES (17, 'Koordinationspartnerschaft'); </sql>
+</changeSet>
+<changeSet author="mw" id="mw-040">
+  <createTable tableName="landingpage">
+    <column autoIncrement="true" name="pageid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="orgaid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="tabno" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="caption" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="content" type="VARCHAR(50000)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="setbyid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-041">
+  <createTable tableName="landkreis">
+    <column autoIncrement="true" 
+    name="lkid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="blid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="kreiskey" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="landkreis" type="VARCHAR(200)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-042">
+  <sql> INSERT INTO landkreis VALUES (1, 10, 5354, 'Aachen'); INSERT INTO landkreis 
+    VALUES (2, 11, 7131, 'Ahrweiler'); INSERT INTO landkreis VALUES (3, 2, 9771, 
+    'Aichach-Friedberg'); INSERT INTO landkreis VALUES (4, 1, 8425, 'Alb-Donau-Kreis'); 
+    INSERT INTO landkreis VALUES (5, 16, 16077, 'Altenburger Land'); INSERT INTO 
+    landkreis VALUES (6, 11, 7132, 'Altenkirchen INSERT INTO landkreis VALUES 
+    (Westerwald)'); INSERT INTO landkreis VALUES (7, 14, 15081, 'Altmarkkreis 
+    Salzwedel'); INSERT INTO landkreis VALUES (8, 2, 9171, 'Altötting'); INSERT 
+    INTO landkreis VALUES (9, 11, 7331, 'Alzey-Worms'); INSERT INTO landkreis 
+    VALUES (10, 2, 9371, 'Amberg-Sulzbach'); INSERT INTO landkreis VALUES (11, 
+    9, 3451, 'Ammerland'); INSERT INTO landkreis VALUES (12, 14, 15082, 'Anhalt-Bitterfeld'); 
+    INSERT INTO landkreis VALUES (13, 2, 9571, 'Ansbach INSERT INTO landkreis 
+    VALUES (Kreis)'); INSERT INTO landkreis VALUES (14, 2, 9671, 'Aschaffenburg 
+    INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (15, 
+    2, 9772, 'Augsburg INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (16, 9, 3452, 'Aurich'); INSERT INTO landkreis VALUES (17, 8, 13051, 
+    'Bad Doberan'); INSERT INTO landkreis VALUES (18, 11, 7332, 'Bad Dürkheim'); 
+    INSERT INTO landkreis VALUES (19, 2, 9672, 'Bad Kissingen'); INSERT INTO 
+    landkreis VALUES (20, 11, 7133, 'Bad Kreuznach'); INSERT INTO landkreis VALUES 
+    (21, 2, 9173, 'Bad Tölz-Wolfratshausen'); INSERT INTO landkreis VALUES (22, 
+    2, 9471, 'Bamberg INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (23, 4, 12060, 'Barnim'); INSERT INTO landkreis VALUES (24, 13, 14625, 
+    'Bautzen'); INSERT INTO landkreis VALUES (25, 2, 9472, 'Bayreuth INSERT INTO 
+    landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (26, 2, 9172, 'Berchtesgadener 
+    Land'); INSERT INTO landkreis VALUES (27, 7, 6431, 'Bergstraße'); INSERT 
+    INTO landkreis VALUES (28, 11, 7231, 'Bernkastel-Wittlich'); INSERT INTO 
+    landkreis VALUES (29, 1, 8426, 'Biberach'); INSERT INTO landkreis VALUES 
+    (30, 11, 7134, 'Birkenfeld'); INSERT INTO landkreis VALUES (31, 1, 8115, 
+    'Böblingen'); INSERT INTO landkreis VALUES (32, 1, 8435, 'Bodenseekreis'); 
+    INSERT INTO landkreis VALUES (33, 14, 15083, 'Börde'); INSERT INTO landkreis 
+    VALUES (34, 10, 5554, 'Borken'); INSERT INTO landkreis VALUES (35, 1, 8315, 
+    'Breisgau-Hochschwarzwald'); INSERT INTO landkreis VALUES (36, 14, 15084, 
+    'Burgenlandkreis'); INSERT INTO landkreis VALUES (37, 1, 8235, 'Calw'); INSERT 
+    INTO landkreis VALUES (38, 9, 3351, 'Celle'); INSERT INTO landkreis VALUES 
+    (39, 2, 9372, 'Cham'); INSERT INTO landkreis VALUES (40, 9, 3453, 'Cloppenburg'); 
+    INSERT INTO landkreis VALUES (41, 2, 9473, 'Coburg INSERT INTO landkreis 
+    VALUES (Kreis)'); INSERT INTO landkreis VALUES (42, 11, 7135, 'Cochem-Zell'); 
+    INSERT INTO landkreis VALUES (43, 10, 5558, 'Coesfeld'); INSERT INTO landkreis 
+    VALUES (44, 9, 3352, 'Cuxhaven'); INSERT INTO landkreis VALUES (45, 2, 9174, 
+    'Dachau'); INSERT INTO landkreis VALUES (46, 4, 12061, 'Dahme-Spreewald'); 
+    INSERT INTO landkreis VALUES (47, 7, 6432, 'Darmstadt-Dieburg'); INSERT INTO 
+    landkreis VALUES (48, 2, 9271, 'Deggendorf'); INSERT INTO landkreis VALUES 
+    (49, 8, 13052, 'Demmin'); INSERT INTO landkreis VALUES (50, 9, 3251, 'Diepholz'); 
+    INSERT INTO landkreis VALUES (51, 2, 9773, 'Dillingen a.d.Donau'); INSERT 
+    INTO landkreis VALUES (52, 2, 9279, 'Dingolfing-Landau'); INSERT INTO landkreis 
+    VALUES (53, 15, 1051, 'Dithmarschen'); INSERT INTO landkreis VALUES (54, 
+    2, 9779, 'Donau-Ries'); INSERT INTO landkreis VALUES (55, 11, 7333, 'Donnersbergkreis'); 
+    INSERT INTO landkreis VALUES (56, 10, 5358, 'Düren'); INSERT INTO landkreis 
+    VALUES (57, 2, 9175, 'Ebersberg'); INSERT INTO landkreis VALUES (58, 16, 
+    16061, 'Eichsfeld'); INSERT INTO landkreis VALUES (59, 2, 9176, 'Eichstätt'); 
+    INSERT INTO landkreis VALUES (60, 11, 7232, 'Eifelkreis Bitburg-Prüm'); INSERT 
+    INTO landkreis VALUES (61, 4, 12062, 'Elbe-Elster'); INSERT INTO landkreis 
+    VALUES (62, 1, 8316, 'Emmendingen'); INSERT INTO landkreis VALUES (63, 9, 
+    3454, 'Emsland'); INSERT INTO landkreis VALUES (64, 10, 5954, 'Ennepe-Ruhr-Kreis'); 
+    INSERT INTO landkreis VALUES (65, 1, 8236, 'Enzkreis'); INSERT INTO landkreis 
+    VALUES (66, 2, 9177, 'Erding'); INSERT INTO landkreis VALUES (67, 2, 9572, 
+    'Erlangen-Höchstadt'); INSERT INTO landkreis VALUES (68, 13, 14521, 'Erzgebirgskreis'); 
+    INSERT INTO landkreis VALUES (69, 1, 8116, 'Esslingen'); INSERT INTO landkreis 
+    VALUES (70, 10, 5366, 'Euskirchen'); INSERT INTO landkreis VALUES (71, 2, 
+    9474, 'Forchheim'); INSERT INTO landkreis VALUES (72, 2, 9178, 'Freising'); 
+    INSERT INTO landkreis VALUES (73, 1, 8237, 'Freudenstadt'); INSERT INTO landkreis 
+    VALUES (74, 2, 9272, 'Freyung-Grafenau'); INSERT INTO landkreis VALUES (75, 
+    9, 3455, 'Friesland'); INSERT INTO landkreis VALUES (76, 7, 6631, 'Fulda'); 
+    INSERT INTO landkreis VALUES (77, 2, 9179, 'Fürstenfeldbruck'); INSERT INTO 
+    landkreis VALUES (78, 2, 9573, 'Fürth INSERT INTO landkreis VALUES (Kreis)'); 
+    INSERT INTO landkreis VALUES (79, 2, 9180, 'Garmisch-Partenkirchen'); INSERT 
+    INTO landkreis VALUES (80, 11, 7334, 'Germersheim'); INSERT INTO landkreis 
+    VALUES (81, 7, 6531, 'Gießen'); INSERT INTO landkreis VALUES (82, 9, 3151, 
+    'Gifhorn'); INSERT INTO landkreis VALUES (83, 1, 8117, 'Göppingen'); INSERT 
+    INTO landkreis VALUES (84, 13, 14626, 'Görlitz'); INSERT INTO landkreis VALUES 
+    (85, 9, 3153, 'Goslar'); INSERT INTO landkreis VALUES (86, 16, 16067, 'Gotha'); 
+    INSERT INTO landkreis VALUES (87, 9, 3152, 'Göttingen'); INSERT INTO landkreis 
+    VALUES (88, 9, 3456, 'Grafschaft Bentheim'); INSERT INTO landkreis VALUES 
+    (89, 16, 16076, 'Greiz'); INSERT INTO landkreis VALUES (90, 7, 6433, 'Groß-Gerau'); 
+    INSERT INTO landkreis VALUES (91, 2, 9774, 'Günzburg'); INSERT INTO landkreis 
+    VALUES (92, 8, 13053, 'Güstrow'); INSERT INTO landkreis VALUES (93, 10, 5754, 
+    'Gütersloh'); INSERT INTO landkreis VALUES (94, 9, 3252, 'Hameln-Pyrmont'); 
+    INSERT INTO landkreis VALUES (95, 9, 3241, 'Hannover, Region'); INSERT INTO 
+    landkreis VALUES (96, 9, 3353, 'Harburg'); INSERT INTO landkreis VALUES (97, 
+    14, 15085, 'Harz'); INSERT INTO landkreis VALUES (98, 2, 9674, 'Haßberge'); 
+    INSERT INTO landkreis VALUES (99, 4, 12063, 'Havelland'); INSERT INTO landkreis 
+    VALUES (100, 1, 8135, 'Heidenheim'); INSERT INTO landkreis VALUES (101, 1, 
+    8125, 'Heilbronn INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (102, 10, 5370, 'Heinsberg'); INSERT INTO landkreis VALUES (103, 9, 
+    3154, 'Helmstedt'); INSERT INTO landkreis VALUES (104, 10, 5758, 'Herford'); 
+    INSERT INTO landkreis VALUES (105, 7, 6632, 'Hersfeld-Rotenburg'); INSERT 
+    INTO landkreis VALUES (106, 15, 1053, 'Herzogtum Lauenburg'); INSERT INTO 
+    landkreis VALUES (107, 16, 16069, 'Hildburghausen'); INSERT INTO landkreis 
+    VALUES (108, 9, 3254, 'Hildesheim'); INSERT INTO landkreis VALUES (109, 10, 
+    5958, 'Hochsauerlandkreis'); INSERT INTO landkreis VALUES (110, 7, 6434, 
+    'Hochtaunuskreis'); INSERT INTO landkreis VALUES (111, 2, 9475, 'Hof INSERT 
+    INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (112, 1, 8126, 
+    'Hohenlohekreis'); INSERT INTO landkreis VALUES (113, 9, 3255, 'Holzminden'); 
+    INSERT INTO landkreis VALUES (114, 10, 5762, 'Höxter'); INSERT INTO landkreis 
+    VALUES (115, 16, 16070, 'Ilm-Kreis'); INSERT INTO landkreis VALUES (116, 
+    14, 15086, 'Jerichower Land'); INSERT INTO landkreis VALUES (117, 11, 7335, 
+    'Kaiserslautern'); INSERT INTO landkreis VALUES (118, 1, 8215, 'Karlsruhe 
+    INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (119, 
+    7, 6633, 'Kassel INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (120, 2, 9273, 'Kelheim'); INSERT INTO landkreis VALUES (121, 2, 9675, 
+    'Kitzingen'); INSERT INTO landkreis VALUES (122, 10, 5154, 'Kleve'); INSERT 
+    INTO landkreis VALUES (123, 1, 8335, 'Konstanz'); INSERT INTO landkreis VALUES 
+    (124, 2, 9476, 'Kronach'); INSERT INTO landkreis VALUES (125, 2, 9477, 'Kulmbach'); 
+    INSERT INTO landkreis VALUES (126, 11, 7336, 'Kusel'); INSERT INTO landkreis 
+    VALUES (127, 16, 16065, 'Kyffhäuserkreis'); INSERT INTO landkreis VALUES 
+    (128, 7, 6532, 'Lahn-Dill-Kreis'); INSERT INTO landkreis VALUES (129, 2, 
+    9181, 'Landsberg am Lech'); INSERT INTO landkreis VALUES (130, 2, 9274, 'Landshut 
+    INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (131, 
+    9, 3457, 'Leer'); INSERT INTO landkreis VALUES (132, 13, 14729, 'Leipzig 
+    INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (133, 
+    2, 9478, 'Lichtenfels'); INSERT INTO landkreis VALUES (134, 7, 6533, 'Limburg-Weilburg'); 
+    INSERT INTO landkreis VALUES (135, 2, 9776, 'Lindau INSERT INTO landkreis 
+    VALUES (Bodensee)'); INSERT INTO landkreis VALUES (136, 10, 5766, 'Lippe'); 
+    INSERT INTO landkreis VALUES (137, 1, 8336, 'Lörrach'); INSERT INTO landkreis 
+    VALUES (138, 9, 3354, 'Lüchow-Dannenberg'); INSERT INTO landkreis VALUES 
+    (139, 1, 8118, 'Ludwigsburg'); INSERT INTO landkreis VALUES (140, 8, 13054, 
+    'Ludwigslust-Parchim'); INSERT INTO landkreis VALUES (141, 9, 3355, 'Lüneburg'); 
+    INSERT INTO landkreis VALUES (142, 7, 6435, 'Main-Kinzig-Kreis'); INSERT 
+    INTO landkreis VALUES (143, 2, 9677, 'Main-Spessart'); INSERT INTO landkreis 
+    VALUES (144, 1, 8128, 'Main-Tauber-Kreis'); INSERT INTO landkreis VALUES 
+    (145, 7, 6436, 'Main-Taunus-Kreis'); INSERT INTO landkreis VALUES (146, 11, 
+    7339, 'Mainz-Bingen'); INSERT INTO landkreis VALUES (147, 14, 15087, 'Mansfeld-Südharz'); 
+    INSERT INTO landkreis VALUES (148, 7, 6534, 'Marburg-Biedenkopf'); INSERT 
+    INTO landkreis VALUES (149, 10, 5962, 'Märkischer Kreis'); INSERT INTO landkreis 
+    VALUES (150, 4, 12064, 'Märkisch-Oderland'); INSERT INTO landkreis VALUES 
+    (151, 11, 7137, 'Mayen-Koblenz'); INSERT INTO landkreis VALUES (152, 8, 13055, 
+    'Mecklenburg-Strelitz'); INSERT INTO landkreis VALUES (153, 13, 14627, 'Meißen'); 
+    INSERT INTO landkreis VALUES (154, 12, 10042, 'Merzig-Wadern'); INSERT INTO 
+    landkreis VALUES (155, 10, 5158, 'Mettmann'); INSERT INTO landkreis VALUES 
+    (156, 2, 9182, 'Miesbach'); INSERT INTO landkreis VALUES (157, 2, 9676, 'Miltenberg'); 
+    INSERT INTO landkreis VALUES (158, 10, 5770, 'Minden-Lübbecke'); INSERT INTO 
+    landkreis VALUES (159, 13, 14522, 'Mittelsachsen'); INSERT INTO landkreis 
+    VALUES (160, 2, 9183, 'Mühldorf a.Inn'); INSERT INTO landkreis VALUES (161, 
+    2, 9184, 'München INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (162, 8, 13056, 'Müritz'); INSERT INTO landkreis VALUES (163, 1, 8225, 
+    'Neckar-Odenwald-Kreis'); INSERT INTO landkreis VALUES (164, 2, 9185, 'Neuburg-Schrobenhausen'); 
+    INSERT INTO landkreis VALUES (165, 2, 9373, 'Neumarkt i.d.OPf.'); INSERT 
+    INTO landkreis VALUES (166, 12, 10043, 'Neunkirchen'); INSERT INTO landkreis 
+    VALUES (167, 2, 9575, 'Neustadt a.d.Aisch-Bad Windsheim'); INSERT INTO landkreis 
+    VALUES (168, 2, 9374, 'Neustadt a.d.Waldnaab'); INSERT INTO landkreis VALUES 
+    (169, 2, 9775, 'Neu-Ulm'); INSERT INTO landkreis VALUES (170, 11, 7138, 'Neuwied'); 
+    INSERT INTO landkreis VALUES (171, 9, 3256, 'Nienburg/Weser'); INSERT INTO 
+    landkreis VALUES (172, 15, 1054, 'Nordfriesland'); INSERT INTO landkreis 
+    VALUES (173, 16, 16062, 'Nordhausen'); INSERT INTO landkreis VALUES (174, 
+    13, 14730, 'Nordsachsen'); INSERT INTO landkreis VALUES (175, 8, 13057, 'Nordvorpommern'); 
+    INSERT INTO landkreis VALUES (176, 8, 13058, 'Nordwestmecklenburg'); INSERT 
+    INTO landkreis VALUES (177, 9, 3155, 'Northeim'); INSERT INTO landkreis VALUES 
+    (178, 2, 9574, 'Nürnberger Land'); INSERT INTO landkreis VALUES (179, 2, 
+    9780, 'Oberallgäu'); INSERT INTO landkreis VALUES (180, 10, 5374, 'Oberbergischer 
+    Kreis'); INSERT INTO landkreis VALUES (181, 4, 12065, 'Oberhavel'); INSERT 
+    INTO landkreis VALUES (182, 4, 12066, 'Oberspreewald-Lausitz'); INSERT INTO 
+    landkreis VALUES (183, 7, 6437, 'Odenwaldkreis'); INSERT INTO landkreis VALUES 
+    (184, 4, 12067, 'Oder-Spree'); INSERT INTO landkreis VALUES (185, 7, 6438, 
+    'Offenbach'); INSERT INTO landkreis VALUES (186, 9, 3458, 'Oldenburg INSERT 
+    INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis VALUES (187, 10, 5966, 
+    'Olpe'); INSERT INTO landkreis VALUES (188, 1, 8317, 'Ortenaukreis'); INSERT 
+    INTO landkreis VALUES (189, 9, 3459, 'Osnabrück INSERT INTO landkreis VALUES 
+    (Kreis)'); INSERT INTO landkreis VALUES (190, 1, 8136, 'Ostalbkreis'); INSERT 
+    INTO landkreis VALUES (191, 2, 9777, 'Ostallgäu'); INSERT INTO landkreis 
+    VALUES (192, 9, 3356, 'Osterholz'); INSERT INTO landkreis VALUES (193, 9, 
+    3156, 'Osterode am Harz'); INSERT INTO landkreis VALUES (194, 15, 1055, 'Ostholstein'); 
+    INSERT INTO landkreis VALUES (195, 4, 12068, 'Ostprignitz-Ruppin'); INSERT 
+    INTO landkreis VALUES (196, 8, 13059, 'Ostvorpommern'); INSERT INTO landkreis 
+    VALUES (197, 10, 5774, 'Paderborn'); INSERT INTO landkreis VALUES (199, 2, 
+    9275, 'Passau'); INSERT INTO landkreis VALUES (200, 9, 3157, 'Peine'); INSERT 
+    INTO landkreis VALUES (201, 2, 9186, 'Pfaffenhofen a.d.Ilm'); INSERT INTO 
+    landkreis VALUES (202, 15, 1056, 'Pinneberg'); INSERT INTO landkreis VALUES 
+    (203, 15, 1057, 'Plön'); INSERT INTO landkreis VALUES (204, 4, 12069, 'Potsdam-Mittelmark'); 
+    INSERT INTO landkreis VALUES (205, 4, 12070, 'Prignitz'); INSERT INTO landkreis 
+    VALUES (206, 1, 8216, 'Rastatt'); INSERT INTO landkreis VALUES (207, 1, 8436, 
+    'Ravensburg'); INSERT INTO landkreis VALUES (208, 10, 5562, 'Recklinghausen'); 
+    INSERT INTO landkreis VALUES (209, 2, 9276, 'Regen'); INSERT INTO landkreis 
+    VALUES (210, 2, 9375, 'Regensburg INSERT INTO landkreis VALUES (Kreis)'); 
+    INSERT INTO landkreis VALUES (211, 1, 8119, 'Rems-Murr-Kreis'); INSERT INTO 
+    landkreis VALUES (212, 15, 1058, 'Rendsburg-Eckernförde'); INSERT INTO landkreis 
+    VALUES (213, 1, 8415, 'Reutlingen'); INSERT INTO landkreis VALUES (214, 10, 
+    5362, 'Rhein-Erft-Kreis'); INSERT INTO landkreis VALUES (215, 7, 6439, 'Rheingau-Taunus-Kreis'); 
+    INSERT INTO landkreis VALUES (216, 11, 7140, 'Rhein-Hunsrück-Kreis'); INSERT 
+    INTO landkreis VALUES (217, 10, 5378, 'Rheinisch-Bergischer Kreis'); INSERT 
+    INTO landkreis VALUES (218, 10, 5162, 'Rhein-Kreis Neuss'); INSERT INTO landkreis 
+    VALUES (219, 11, 7141, 'Rhein-Lahn-Kreis'); INSERT INTO landkreis VALUES 
+    (220, 1, 8226, 'Rhein-Neckar-Kreis'); INSERT INTO landkreis VALUES (221, 
+    11, 7338, 'Rhein-Pfalz-Kreis'); INSERT INTO landkreis VALUES (222, 10, 5382, 
+    'Rhein-Sieg-Kreis'); INSERT INTO landkreis VALUES (223, 2, 9673, 'Rhön-Grabfeld'); 
+    INSERT INTO landkreis VALUES (224, 2, 9187, 'Rosenheim'); INSERT INTO landkreis 
+    VALUES (225, 9, 3357, 'Rotenburg'); INSERT INTO landkreis VALUES (226, 2, 
+    9576, 'Roth'); INSERT INTO landkreis VALUES (227, 2, 9277, 'Rottal-Inn'); 
+    INSERT INTO landkreis VALUES (228, 1, 8325, 'Rottweil'); INSERT INTO landkreis 
+    VALUES (229, 8, 13061, 'Vorpommern-Rügen'); INSERT INTO landkreis VALUES 
+    (230, 16, 16074, 'Saale-Holzland-Kreis'); INSERT INTO landkreis VALUES (231, 
+    14, 15088, 'Saalekreis'); INSERT INTO landkreis VALUES (232, 16, 16075, 'Saale-Orla-Kreis'); 
+    INSERT INTO landkreis VALUES (233, 16, 16073, 'Saalfeld-Rudolstadt'); INSERT 
+    INTO landkreis VALUES (234, 12, 10041, 'Saarbrücken, Regionalverband'); INSERT 
+    INTO landkreis VALUES (235, 12, 10044, 'Saarlouis'); INSERT INTO landkreis 
+    VALUES (236, 12, 10045, 'Saarpfalz-Kreis'); INSERT INTO landkreis VALUES 
+    (237, 13, 14628, 'Sächsische Schweiz-Osterzgebirge'); INSERT INTO landkreis 
+    VALUES (238, 14, 15089, 'Salzlandkreis'); INSERT INTO landkreis VALUES (239, 
+    9, 3257, 'Schaumburg'); INSERT INTO landkreis VALUES (240, 15, 1059, 'Schleswig-Flensburg'); 
+    INSERT INTO landkreis VALUES (241, 16, 16066, 'Schmalkalden-Meiningen'); 
+    INSERT INTO landkreis VALUES (242, 1, 8127, 'Schwäbisch Hall'); INSERT INTO 
+    landkreis VALUES (243, 7, 6634, 'Schwalm-Eder-Kreis'); INSERT INTO landkreis 
+    VALUES (244, 2, 9376, 'Schwandorf'); INSERT INTO landkreis VALUES (245, 1, 
+    8326, 'Schwarzwald-Baar-Kreis'); INSERT INTO landkreis VALUES (246, 2, 9678, 
+    'Schweinfurt INSERT INTO landkreis VALUES (Kreis)'); INSERT INTO landkreis 
+    VALUES (247, 15, 1060, 'Segeberg'); INSERT INTO landkreis VALUES (248, 10, 
+    5970, 'Siegen-Wittgenstein'); INSERT INTO landkreis VALUES (249, 1, 8437, 
+    'Sigmaringen'); INSERT INTO landkreis VALUES (250, 10, 5974, 'Soest'); INSERT 
+    INTO landkreis VALUES (251, 9, 3358, 'Heidekreis/Soltau-Fallingbostel'); 
+    INSERT INTO landkreis VALUES (252, 16, 16068, 'Sömmerda'); INSERT INTO landkreis 
+    VALUES (253, 16, 16072, 'Sonneberg'); INSERT INTO landkreis VALUES (254, 
+    4, 12071, 'Spree-Neiße'); INSERT INTO landkreis VALUES (255, 12, 10046, 'St. 
+    Wendel'); INSERT INTO landkreis VALUES (256, 9, 3359, 'Stade'); INSERT INTO 
+    landkreis VALUES (257, 2, 9188, 'Starnberg'); INSERT INTO landkreis VALUES 
+    (258, 15, 1061, 'Steinburg'); INSERT INTO landkreis VALUES (259, 10, 5566, 
+    'Steinfurt'); INSERT INTO landkreis VALUES (260, 14, 15090, 'Stendal'); INSERT 
+    INTO landkreis VALUES (261, 15, 1062, 'Stormarn'); INSERT INTO landkreis 
+    VALUES (262, 2, 9278, 'Straubing-Bogen'); INSERT INTO landkreis VALUES (263, 
+    11, 7337, 'Südliche Weinstraße'); INSERT INTO landkreis VALUES (264, 11, 
+    7340, 'Südwestpfalz'); INSERT INTO landkreis VALUES (265, 4, 12072, 'Teltow-Fläming'); 
+    INSERT INTO landkreis VALUES (266, 2, 9377, 'Tirschenreuth'); INSERT INTO 
+    landkreis VALUES (267, 2, 9189, 'Traunstein'); INSERT INTO landkreis VALUES 
+    (268, 11, 7235, 'Trier-Saarburg'); INSERT INTO landkreis VALUES (269, 1, 
+    8416, 'Tübingen'); INSERT INTO landkreis VALUES (270, 1, 8327, 'Tuttlingen'); 
+    INSERT INTO landkreis VALUES (271, 4, 12073, 'Uckermark'); INSERT INTO landkreis 
+    VALUES (272, 8, 13062, 'Uecker-Randow'); INSERT INTO landkreis VALUES (273, 
+    9, 3360, 'Uelzen'); INSERT INTO landkreis VALUES (274, 10, 5978, 'Unna'); 
+    INSERT INTO landkreis VALUES (275, 16, 16064, 'Unstrut-Hainich-Kreis'); INSERT 
+    INTO landkreis VALUES (276, 2, 9778, 'Unterallgäu'); INSERT INTO landkreis 
+    VALUES (277, 9, 3460, 'Vechta'); INSERT INTO landkreis VALUES (278, 9, 3361, 
+    'Verden'); INSERT INTO landkreis VALUES (279, 10, 5166, 'Viersen'); INSERT 
+    INTO landkreis VALUES (280, 7, 6535, 'Vogelsbergkreis'); INSERT INTO landkreis 
+    VALUES (281, 13, 14523, 'Vogtlandkreis'); INSERT INTO landkreis VALUES (282, 
+    11, 7233, 'Vulkaneifel'); INSERT INTO landkreis VALUES (283, 7, 6635, 'Waldeck-Frankenberg'); 
+    INSERT INTO landkreis VALUES (284, 1, 8337, 'Waldshut'); INSERT INTO landkreis 
+    VALUES (285, 10, 5570, 'Warendorf'); INSERT INTO landkreis VALUES (286, 16, 
+    16063, 'Wartburgkreis'); INSERT INTO landkreis VALUES (287, 2, 9190, 'Weilheim-Schongau'); 
+    INSERT INTO landkreis VALUES (288, 16, 16071, 'Weimarer Land'); INSERT INTO 
+    landkreis VALUES (289, 2, 9577, 'Weißenburg-Gunzenhausen'); INSERT INTO landkreis 
+    VALUES (290, 7, 6636, 'Werra-Meißner-Kreis'); INSERT INTO landkreis VALUES 
+    (291, 10, 5170, 'Wesel'); INSERT INTO landkreis VALUES (292, 9, 3461, 'Wesermarsch'); 
+    INSERT INTO landkreis VALUES (293, 11, 7143, 'Westerwaldkreis'); INSERT INTO 
+    landkreis VALUES (294, 7, 6440, 'Wetteraukreis'); INSERT INTO landkreis VALUES 
+    (295, 14, 15091, 'Wittenberg'); INSERT INTO landkreis VALUES (296, 9, 3462, 
+    'Wittmund'); INSERT INTO landkreis VALUES (297, 9, 3158, 'Wolfenbüttel'); 
+    INSERT INTO landkreis VALUES (298, 2, 9479, 'Wunsiedel i.Fichtelgebirge'); 
+    INSERT INTO landkreis VALUES (299, 2, 9679, 'Würzburg INSERT INTO landkreis 
+    VALUES (Kreis)'); INSERT INTO landkreis VALUES (300, 1, 8417, 'Zollernalbkreis'); 
+    INSERT INTO landkreis VALUES (301, 13, 14524, 'Zwickau'); INSERT INTO landkreis 
+    VALUES (302, 2, 1, 'Amberg'); INSERT INTO landkreis VALUES (303, 2, 2, 'Ansbach 
+    INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES (304, 
+    2, 3, 'Aschaffenburg INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO 
+    landkreis VALUES (305, 2, 4, 'Augsburg INSERT INTO landkreis VALUES (Stadt)'); 
+    INSERT INTO landkreis VALUES (306, 1, 5, 'Baden-Baden'); INSERT INTO landkreis 
+    VALUES (307, 2, 6, 'Bamberg INSERT INTO landkreis VALUES (Stadt)'); INSERT 
+    INTO landkreis VALUES (308, 2, 7, 'Bayreuth INSERT INTO landkreis VALUES 
+    (Stadt)'); INSERT INTO landkreis VALUES (309, 3, 8, 'Berlin'); INSERT INTO 
+    landkreis VALUES (310, 10, 9, 'Bielefeld'); INSERT INTO landkreis VALUES 
+    (311, 10, 10, 'Bochum'); INSERT INTO landkreis VALUES (312, 10, 11, 'Bonn'); 
+    INSERT INTO landkreis VALUES (313, 10, 12, 'Bottrop'); INSERT INTO landkreis 
+    VALUES (314, 4, 13, 'Brandenburg an der Havel'); INSERT INTO landkreis VALUES 
+    (315, 9, 14, 'Braunschweig'); INSERT INTO landkreis VALUES (316, 5, 15, 'Bremen'); 
+    INSERT INTO landkreis VALUES (317, 5, 16, 'Bremerhaven'); INSERT INTO landkreis 
+    VALUES (318, 13, 17, 'Chemnitz'); INSERT INTO landkreis VALUES (319, 2, 18, 
+    'Coburg INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES 
+    (320, 4, 19, 'Cottbus'); INSERT INTO landkreis VALUES (321, 7, 20, 'Darmstadt'); 
+    INSERT INTO landkreis VALUES (322, 9, 21, 'Delmenhorst'); INSERT INTO landkreis 
+    VALUES (323, 14, 22, 'Dessau-Roßlau'); INSERT INTO landkreis VALUES (324, 
+    10, 23, 'Dortmund'); INSERT INTO landkreis VALUES (325, 13, 24, 'Dresden'); 
+    INSERT INTO landkreis VALUES (326, 10, 25, 'Duisburg'); INSERT INTO landkreis 
+    VALUES (327, 10, 26, 'Düsseldorf'); INSERT INTO landkreis VALUES (328, 16, 
+    27, 'Eisenach'); INSERT INTO landkreis VALUES (329, 9, 28, 'Emden'); INSERT 
+    INTO landkreis VALUES (330, 16, 29, 'Erfurt'); INSERT INTO landkreis VALUES 
+    (331, 2, 30, 'Erlangen'); INSERT INTO landkreis VALUES (332, 10, 31, 'Essen'); 
+    INSERT INTO landkreis VALUES (333, 15, 32, 'Flensburg'); INSERT INTO landkreis 
+    VALUES (334, 11, 33, 'Frankenthal INSERT INTO landkreis VALUES (Pfalz)'); 
+    INSERT INTO landkreis VALUES (335, 4, 34, 'Frankfurt INSERT INTO landkreis 
+    VALUES (Oder)'); INSERT INTO landkreis VALUES (336, 7, 35, 'Frankfurt am 
+    Main'); INSERT INTO landkreis VALUES (337, 1, 36, 'Freiburg im Breisgau'); 
+    INSERT INTO landkreis VALUES (338, 2, 37, 'Fürth INSERT INTO landkreis VALUES 
+    (Stadt)'); INSERT INTO landkreis VALUES (339, 10, 38, 'Gelsenkirchen'); INSERT 
+    INTO landkreis VALUES (340, 16, 39, 'Gera'); INSERT INTO landkreis VALUES 
+    (341, 9, 40, 'Göttingen'); INSERT INTO landkreis VALUES (342, 10, 41, 'Hagen'); 
+    INSERT INTO landkreis VALUES (343, 14, 42, 'Halle INSERT INTO landkreis VALUES 
+    (Saale)'); INSERT INTO landkreis VALUES (344, 6, 43, 'Hamburg'); INSERT INTO 
+    landkreis VALUES (345, 10, 44, 'Hamm'); INSERT INTO landkreis VALUES (346, 
+    9, 45, 'Hannover'); INSERT INTO landkreis VALUES (347, 1, 46, 'Heidelberg'); 
+    INSERT INTO landkreis VALUES (348, 1, 47, 'Heilbronn INSERT INTO landkreis 
+    VALUES (Stadt)'); INSERT INTO landkreis VALUES (349, 10, 48, 'Herne'); INSERT 
+    INTO landkreis VALUES (350, 2, 49, 'Hof INSERT INTO landkreis VALUES (Stadt)'); 
+    INSERT INTO landkreis VALUES (351, 2, 50, 'Ingolstadt'); INSERT INTO landkreis 
+    VALUES (352, 16, 51, 'Jena'); INSERT INTO landkreis VALUES (353, 11, 52, 
+    'Kaiserslautern'); INSERT INTO landkreis VALUES (354, 1, 53, 'Karlsruhe INSERT 
+    INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES (355, 7, 54, 
+    'Kassel INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES 
+    (356, 2, 55, 'Kaufbeuren'); INSERT INTO landkreis VALUES (357, 2, 56, 'Kempten 
+    INSERT INTO landkreis VALUES (Allgäu)'); INSERT INTO landkreis VALUES (358, 
+    15, 57, 'Kiel'); INSERT INTO landkreis VALUES (359, 11, 58, 'Koblenz'); INSERT 
+    INTO landkreis VALUES (360, 10, 59, 'Köln'); INSERT INTO landkreis VALUES 
+    (361, 10, 60, 'Krefeld'); INSERT INTO landkreis VALUES (362, 11, 61, 'Landau 
+    in der Pfalz'); INSERT INTO landkreis VALUES (363, 2, 62, 'Landshut INSERT 
+    INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES (364, 13, 63, 
+    'Leipzig INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES 
+    (365, 10, 64, 'Leverkusen'); INSERT INTO landkreis VALUES (366, 15, 65, 'Lübeck'); 
+    INSERT INTO landkreis VALUES (367, 11, 66, 'Ludwigshafen am Rhein'); INSERT 
+    INTO landkreis VALUES (368, 14, 67, 'Magdeburg'); INSERT INTO landkreis VALUES 
+    (369, 11, 68, 'Mainz'); INSERT INTO landkreis VALUES (370, 1, 69, 'Mannheim'); 
+    INSERT INTO landkreis VALUES (371, 2, 70, 'Memmingen'); INSERT INTO landkreis 
+    VALUES (372, 10, 71, 'Mönchengladbach'); INSERT INTO landkreis VALUES (373, 
+    10, 72, 'Mülheim an der Ruhr'); INSERT INTO landkreis VALUES (374, 2, 73, 
+    'München INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES 
+    (375, 10, 74, 'Münster'); INSERT INTO landkreis VALUES (376, 15, 75, 'Neumünster'); 
+    INSERT INTO landkreis VALUES (377, 11, 76, 'Neustadt an der Weinstraße'); 
+    INSERT INTO landkreis VALUES (378, 2, 77, 'Nürnberg'); INSERT INTO landkreis 
+    VALUES (379, 10, 78, 'Oberhausen'); INSERT INTO landkreis VALUES (380, 7, 
+    79, 'Offenbach am Main'); INSERT INTO landkreis VALUES (381, 9, 80, 'Oldenburg 
+    INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis VALUES (382, 
+    9, 81, 'Osnabrück INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis 
+    VALUES (383, 2, 82, 'Passau'); INSERT INTO landkreis VALUES (384, 1, 83, 
+    'Pforzheim'); INSERT INTO landkreis VALUES (385, 11, 84, 'Pirmasens'); INSERT 
+    INTO landkreis VALUES (386, 4, 85, 'Potsdam'); INSERT INTO landkreis VALUES 
+    (387, 2, 86, 'Regensburg INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO 
+    landkreis VALUES (388, 10, 87, 'Remscheid'); INSERT INTO landkreis VALUES 
+    (389, 2, 88, 'Rosenheim'); INSERT INTO landkreis VALUES (390, 8, 89, 'Rostock'); 
+    INSERT INTO landkreis VALUES (391, 9, 90, 'Salzgitter'); INSERT INTO landkreis 
+    VALUES (392, 2, 91, 'Schwabach'); INSERT INTO landkreis VALUES (393, 2, 92, 
+    'Schweinfurt INSERT INTO landkreis VALUES (Stadt)'); INSERT INTO landkreis 
+    VALUES (394, 8, 93, 'Schwerin'); INSERT INTO landkreis VALUES (395, 10, 94, 
+    'Solingen'); INSERT INTO landkreis VALUES (396, 11, 95, 'Speyer'); INSERT 
+    INTO landkreis VALUES (397, 2, 96, 'Straubing'); INSERT INTO landkreis VALUES 
+    (398, 1, 97, 'Stuttgart'); INSERT INTO landkreis VALUES (399, 16, 98, 'Suhl'); 
+    INSERT INTO landkreis VALUES (400, 11, 99, 'Trier'); INSERT INTO landkreis 
+    VALUES (401, 1, 100, 'Ulm'); INSERT INTO landkreis VALUES (402, 2, 101, 'Weiden 
+    in der Oberpfalz'); INSERT INTO landkreis VALUES (403, 16, 102, 'Weimar'); 
+    INSERT INTO landkreis VALUES (404, 7, 103, 'Wiesbaden'); INSERT INTO landkreis 
+    VALUES (405, 9, 104, 'Wilhelmshaven'); INSERT INTO landkreis VALUES (406, 
+    9, 105, 'Wolfsburg'); INSERT INTO landkreis VALUES (407, 11, 106, 'Worms'); 
+    INSERT INTO landkreis VALUES (408, 10, 107, 'Wuppertal'); INSERT INTO landkreis 
+    VALUES (409, 2, 108, 'Würzburg INSERT INTO landkreis VALUES (Stadt)'); INSERT 
+    INTO landkreis VALUES (410, 11, 109, 'Zweibrücken'); INSERT INTO landkreis 
+    VALUES (420, 3, 119, 'Berlin-Marzahn-Hellersdorf'); INSERT INTO landkreis 
+    VALUES (419, 3, 118, 'Berlin-Lichtenberg'); INSERT INTO landkreis VALUES 
+    (418, 3, 117, 'Berlin-Friedrichshain-Kreuzberg'); INSERT INTO landkreis VALUES 
+    (417, 3, 116, 'Berlin-Pankow'); INSERT INTO landkreis VALUES (416, 3, 115, 
+    'Berlin-Tempelhof-Schöneberg'); INSERT INTO landkreis VALUES (415, 3, 114, 
+    'Berlin-Mitte'); INSERT INTO landkreis VALUES (414, 3, 113, 'Berlin-Reinickendorf'); 
+    INSERT INTO landkreis VALUES (413, 3, 112, 'Berlin-Charlottenburg-Wilmersdorf'); 
+    INSERT INTO landkreis VALUES (412, 3, 111, 'Berlin-Steglitz-Zehlendorf'); 
+    INSERT INTO landkreis VALUES (411, 3, 110, 'Berlin-Spandau'); INSERT INTO 
+    landkreis VALUES (421, 3, 120, 'Berlin-Treptow-Köpenick'); INSERT INTO landkreis 
+    VALUES (422, 3, 121, 'Berlin-Neukölln'); INSERT INTO landkreis VALUES (423, 
+    6, 122, 'Hamburg-Altona'); INSERT INTO landkreis VALUES (424, 6, 123, 'Hamburg-Eimsbüttel'); 
+    INSERT INTO landkreis VALUES (425, 6, 124, 'Hamburg-Nord'); INSERT INTO landkreis 
+    VALUES (426, 6, 125, 'Hamburg-Wandsbeck'); INSERT INTO landkreis VALUES (427, 
+    6, 126, 'Hamburg-Mitte'); INSERT INTO landkreis VALUES (429, 6, 128, 'Hamburg-Harburg'); 
+    INSERT INTO landkreis VALUES (430, 6, 129, 'Hamburg-Bergedorf'); INSERT INTO 
+    landkreis VALUES (431, 6, 130, 'Hamburg-Mitte-Neuwerk'); INSERT INTO landkreis 
+    VALUES (432, 8, 13072, 'Landkreis Rostock'); INSERT INTO landkreis VALUES 
+    (433, 8, 13075, 'Vorpommern-Greifswald'); INSERT INTO landkreis VALUES (434, 
+    8, 13071, 'Mecklenburgische-Seenplatte'); </sql>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-043">
+  <createTable tableName="lizenzhinweis">
+    <column 
+    autoIncrement="true" name="iid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="lizenzhinweis" type="VARCHAR(2000)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-044">
+  <sql>
+    <![CDATA[ INSERT INTO lizenzhinweis VALUES 
+    (1, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, <a 
+    href=''https://commons.wikimedia.org/wiki/File:Baden-Württemberg,_administrative_divisions_-_de_-_colored.svg''>Baden-Württemberg, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a> '); INSERT INTO lizenzhinweis VALUES (2, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Bavaria,_administrative_divisions_-_de_-_colored.svg''>Bavaria, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a> '); INSERT INTO lizenzhinweis VALUES (3, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Berlin,_administrative_divisions_(+districts_+boroughs_-pop)_-_de_-_colored_(less_colors).svg''>Berlin, 
+    administrative divisions (+districts +boroughs -pop) - de - colored (less 
+    colors)</a>, Ausschnitt von aufstehenbasis.de, <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' 
+    rel=''license''>CC BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (4, 
+    '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, <a href=''https://commons.wikimedia.org/wiki/File:Brandenburg,_administrative_divisions_-_de_-_colored.svg''>Brandenburg, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (5, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Lower_Saxony,_administrative_divisions_-_de_-_colored.svg''>Lower 
+    Saxony, administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (6, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Hamburg,_administrative_divisions_(+districts_+boroughs_+pop)_-_de_-_colored_(less_colors).svg''>Hamburg, 
+    administrative divisions (+districts +boroughs +pop) - de - colored (less 
+    colors)</a>, Ausschnitt von aufstehenbasis.de, <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' 
+    rel=''license''>CC BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (7, 
+    '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, <a href=''https://commons.wikimedia.org/wiki/File:Hesse,_administrative_divisions_-_de_-_colored.svg''>Hesse, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a> '); INSERT INTO lizenzhinweis VALUES (8, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Mecklenburg-Vorpommern_districts_2011_colored_labeled.svg''>Mecklenburg-Vorpommern 
+    districts 2011 colored labeled</a>, Ausschnitt von aufstehenbasis.de, <a 
+    href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (9, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Lower_Saxony,_administrative_divisions_-_de_-_colored.svg''>Lower 
+    Saxony, administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (10, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Nordrhein-Westfalen,_administrative_divisions_-_de_-_colored.svg''>Nordrhein-Westfalen, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (11, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Rhineland-Palatinate,_administrative_divisions_-_de_-_colored.svg''>Rhineland-Palatinate, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (12, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Saarland,_administrative_divisions_-_de_-_colored.svg''>Saarland, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (13, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Saxony,_administrative_divisions_-_de_-_colored.svg''>Saxony, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (14, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Saxony-Anhalt,_administrative_divisions_-_de_-_colored.svg''>Saxony-Anhalt, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (15, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Schleswig-Holstein,_administrative_divisions_-_de_-_colored.svg''>Schleswig-Holstein, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); INSERT INTO lizenzhinweis VALUES (16, '<a href=''https://commons.wikimedia.org/wiki/User:TUBS''>TUBS</a>, 
+    <a href=''https://commons.wikimedia.org/wiki/File:Thuringia,_administrative_divisions_-_de_-_colored.svg''>Thuringia, 
+    administrative divisions - de - colored</a>, Ausschnitt von aufstehenbasis.de, 
+    <a href=''https://creativecommons.org/licenses/by-sa/3.0/legalcode'' rel=''license''>CC 
+    BY-SA 3.0</a>'); ]]>
+  </sql>
+</changeSet>
+<changeSet author="mw" id="mw-045">
+  <createTable tableName="medialink">
+    <column autoIncrement="true" name="linkid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="mtid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bild" type="BYTEA" />
+    <column name="link" type="VARCHAR(300)" 
+    />
+    <column name="orgaid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-046">
+  <createTable 
+    tableName="mediatyp">
+    <column autoIncrement="true" name="mtid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="rubrik" 
+    type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="caption" 
+    type="VARCHAR(300)" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-047">
+  <sql> INSERT INTO mediatyp VALUES (1, 'tv', 'Neues vom aufstehenTV'); 
+    INSERT INTO mediatyp VALUES (2, 'news', 'Aus den Medien'); </sql>
+</changeSet>
+<changeSet author="mw" id="mw-048">
+  <createTable tableName="msg">
+    <column 
+    autoIncrement="true" name="msgid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="datum" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+    <column name="moddatum" type="TIMESTAMP" 
+    />
+    <column name="deldatum" type="TIMESTAMP" />
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="nachricht" type="BYTEA">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-049">
+  <createTable tableName="msg2item">
+    <column name="msgid" 
+    type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_msg2item" 
+    />
+    </column>
+    <column name="iid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_msg2item" />
+    </column>
+    <column name="respmsgid" 
+    type="INT" />
+    <column name="ownertype" type="CHAR(1)" />
+    <column name="thrdid" 
+    type="INT" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-050">
+  <createTable tableName="msg2user">
+    <column name="msgid" type="INT">
+      <constraints 
+    nullable="false" primaryKey="true" primaryKeyName="pk_msg2user" />
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_msg2user" />
+    </column>
+    <column name="respmsgid" type="INT" 
+    />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-051">
+  <createTable 
+    tableName="nicknamelog">
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="oldnickname" type="VARCHAR(100)" />
+    <column name="changedate" 
+    type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-052">
+  <createTable tableName="orgacollaboration">
+    <column autoIncrement="true" 
+    name="collid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="orgaid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="otherorgaid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="enabled" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="setbyid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-053">
+  <createTable tableName="orgapicture">
+    <column autoIncrement="true" name="pictid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="orgaid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="picturename" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="picturedata" type="BYTEA">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-054">
+  <createTable tableName="stimme">
+    <column name="wid" type="INT">
+      <constraints 
+    nullable="false" primaryKey="true" primaryKeyName="pk_stimme" />
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_stimme" />
+    </column>
+    <column name="kid" type="INT">
+      <constraints 
+    nullable="false" primaryKey="true" primaryKeyName="pk_stimme" />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-055">
+  <createTable 
+    tableName="termin">
+    <column autoIncrement="true" name="tid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="itid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erstellerid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="gruppenid" 
+    type="INT" />
+    <column name="veranstalterid" type="INT" />
+    <column name="adrid" 
+    type="INT" />
+    <column name="startzeit" type="TIMESTAMP" />
+    <column name="endzeit" 
+    type="TIMESTAMP" />
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(50000)" 
+    />
+    <column name="status" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="anmeldung" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="abmeldung" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="tnmin" type="INT" />
+    <column name="tnmax" type="INT" 
+    />
+    <column name="kmpid" type="INT" />
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-056">
+  <createTable tableName="termin2feld">
+    <column name="tid" 
+    type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_termin2feld" 
+    />
+    </column>
+    <column name="feldid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_termin2feld" />
+    </column>
+    <column name="wert" 
+    type="VARCHAR(1000)" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-057">
+  <createTable tableName="termin2feldperson">
+    <column autoIncrement="true" 
+    name="tfpid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="tid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="feldid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-058">
+  <createTable tableName="terminfeld">
+    <column autoIncrement="true" name="feldid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="itid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="feldtyp" type="CHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="kategorie" type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="feldname" type="VARCHAR(100)" />
+    <column name="reihenfolge" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-059">
+  <createTable tableName="terminstatus">
+    <column name="status" type="CHAR(1)">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(100)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-060">
+  <createTable tableName="these">
+    <column autoIncrement="true" name="thsid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="wsnid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(2000)" />
+    <column name="datum" 
+    type="TIMESTAMP" />
+    <column name="moddatum" type="TIMESTAMP" />
+    <column name="deldatum" 
+    type="TIMESTAMP" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-061">
+  <createTable tableName="thread">
+    <column autoIncrement="true" name="thrdid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="iid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(300)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(1000)" />
+    <column name="visibility" 
+    type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-062">
+  <createTable tableName="user2item">
+    <column name="userid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_user2item" />
+    </column>
+    <column name="iid" type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_user2item" 
+    />
+    </column>
+    <column name="erstellerid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="anmerkung" type="VARCHAR(1000)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="datum" type="TIMESTAMP" />
+    <column name="zuletztbesucht" 
+    type="TIMESTAMP" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-063">
+  <createTable tableName="user2termin">
+    <column name="userid" type="INT">
+      <constraints 
+    nullable="false" primaryKey="true" primaryKeyName="pk_user2termin" />
+    </column>
+    <column name="tid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_user2termin" />
+    </column>
+    <column name="teilnahmestatus" 
+    type="CHAR(1)" />
+    <column name="datum" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+      <constraints nullable="false"/>
+    </column>
+    <column name="personenzahl" type="INT" 
+    defaultValue="1">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-064">
+  <createTable tableName="usersetting2orga">
+    <column name="userid" type="INT">
+      <constraints nullable="false" primaryKey="true" 
+    primaryKeyName="pk_usersetting2orga" />
+    </column>
+    <column name="orgaid" type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_usersetting2orga" 
+    />
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-065">
+  <createTable tableName="usersettings">
+    <column name="userid" type="INT">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="benachrichtigung" 
+    type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="letztebenachrichtigung" 
+    type="TIMESTAMP" />
+    <column name="zuletztbesucht" type="TIMESTAMP" />
+    <column 
+    name="showintro" type="CHAR(1)" defaultValue="Y">
+      <constraints nullable="false"/>
+    </column>
+    <column name="showhelp" type="CHAR(1)" defaultValue="Y">
+      <constraints 
+    nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" 
+    id="mw-066">
+  <createTable tableName="vercode">
+    <column name="vercode" type="CHAR(10)">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="createdbyid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="createddate" 
+    type="TIMESTAMP" />
+    <column name="usedbyid" type="INT" />
+    <column name="useddate" 
+    type="TIMESTAMP" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-067">
+  <createTable tableName="wahl">
+    <column autoIncrement="true" name="wid" type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="ebene" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erstellerid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="iid" 
+    type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="bezeichnung" 
+    type="VARCHAR(500)" />
+    <column name="beschreibung" type="VARCHAR(2000)" />
+    <column name="wpid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="startzeit" type="TIMESTAMP" />
+    <column name="endzeit" type="TIMESTAMP" 
+    />
+    <column name="wahlmodus" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="quorum" type="DECIMAL(5,2)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="erfolgswert" type="INT">
+      <constraints nullable="false"/>
+    </column>
+    <column name="subgruppen" type="CHAR(1)">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-068">
+  <createTable tableName="wahlphase">
+    <column autoIncrement="true" name="wpid" 
+    type="SERIAL">
+      <constraints nullable="false" primaryKey="true"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(100)" />
+  </createTable>
+</changeSet>
+<changeSet author="mw" id="mw-069">
+  <sql> INSERT INTO wahlphase VALUES (1, 
+    'Noch nicht gestartet'); INSERT INTO wahlphase VALUES (2, 'Kandidatensammlung'); 
+    INSERT INTO wahlphase VALUES (3, 'Laufend'); INSERT INTO wahlphase VALUES 
+    (4, 'Beendet'); INSERT INTO wahlphase VALUES (5, 'Erledigt'); </sql>
+</changeSet>
+<changeSet author="mw" id="mw-070">
+  <createTable tableName="wissen">
+    <column 
+    autoIncrement="true" name="wsnid" type="SERIAL">
+      <constraints nullable="false" 
+    primaryKey="true"/>
+    </column>
+    <column name="userid" type="INT">
+      <constraints 
+    nullable="false"/>
+    </column>
+    <column name="bezeichnung" type="VARCHAR(500)">
+      <constraints nullable="false"/>
+    </column>
+    <column name="beschreibung" type="VARCHAR(2000)" 
+    />
+    <column name="datum" type="TIMESTAMP" />
+    <column name="moddatum" type="TIMESTAMP" 
+    />
+    <column name="deldatum" type="TIMESTAMP" />
+    <column name="orgaid" type="INT">
+      <constraints nullable="false"/>
+    </column>
+  </createTable>
+</changeSet>
+<changeSet 
+    author="mw" id="mw-071">
+  <createTable tableName="wissen2thema">
+    <column name="wsnid" 
+    type="INT">
+      <constraints nullable="false" primaryKey="true" primaryKeyName="pk_wissen2thema" 
+    />
+    </column>
+    <column name="thmid" type="INT">
+      <constraints nullable="false" 
+    primaryKey="true" primaryKeyName="pk_wissen2thema" />
+    </column>
+  </createTable>
+</changeSet>
+	 -->
+
+</databaseChangeLog>

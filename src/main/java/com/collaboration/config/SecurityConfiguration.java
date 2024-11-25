@@ -45,11 +45,13 @@ public class SecurityConfiguration {
       .authorizeHttpRequests(r -> r.requestMatchers(
         "/favicon.ico", "/v1/users/login", "/v1/users/activate-account/**", "/v1/users/prepare-password-reset", "/v1/users/reset-password/**").permitAll()
       .requestMatchers(
-        "/v1/users/**", "/v1/nonusers/**", "/v1/roles/**", "/v1/authorities/**", "/v1/itemtypes/**", "/v1/permissions/**").hasRole("USER")
+        "/v1/users/**", "/v1/nonusers/**", "/v1/roles/**", "/v1/itemtypes/**", "/v1/permissions/**").hasRole("USER")
       .requestMatchers(
         "/swagger-ui.html", "/swagger-ui/**", "/api-docs/**").hasAnyRole("DEVELOPER", "ADMIN")
       .requestMatchers(
-        "/v1/organizations/**").hasAnyRole("DEVELOPER", "ADMIN") // Only for development!
+        "/v1/organizations/**").hasAnyRole("DEVELOPER", "ADMIN") // Only for development! After that only ADMIN
+      .requestMatchers(
+        "/v1/authorities/**").hasAnyRole("ADMIN")
       .anyRequest().denyAll());
       http.httpBasic(Customizer.withDefaults());
       http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
