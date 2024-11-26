@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Tag(name = "Authority Management", description = "APIs for managing authorities")
+@Tag(name = "Authority Management (Admin only)", description = "APIs for managing authorities")
 @RequestMapping("/v1/authorities")
 public class AuthorityController {
 

@@ -54,11 +54,20 @@ public class PermissionService {
       Permission permission = permissionRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
       return convertToDTO(permission);
     }
-/*
+
     public List<PermissionDTO> getAllPermissionsByOrgaId(final long orgaid) {
       return permissionRepository.findByOrgaid(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
     }
-*/
+
+    public List<PermissionDTO> getByAndItemtypeidAndItemidAndRoleidIn(final long itemtypeId, final long itemId, final List<Long> roleIds) {
+      return permissionRepository.findByItemtypeidAndItemidAndRoleidIn(itemtypeId, itemId, roleIds).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+    }
+    
+    public List<PermissionDTO> getByAndItemtypeidAndRoleidIn(final long itemtypeId, final List<Long> roleIds) {
+      return permissionRepository.findByItemtypeidAndRoleidIn(itemtypeId, roleIds).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+    }
+
+    
     private Permission convertFromDTO(final PermissionDTO permissionDTO) {
       return modelMapper.map(permissionDTO, Permission.class);
     }

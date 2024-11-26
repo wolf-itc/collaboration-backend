@@ -23,17 +23,15 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Authority;
 import com.collaboration.model.AuthorityRepository;
-import com.collaboration.model.User;
-import com.collaboration.model.UserDTO;
-import com.collaboration.model.UserRepository;
 import com.collaboration.model.Item;
 import com.collaboration.model.Item2Orga;
 import com.collaboration.model.Item2OrgaRepository;
 import com.collaboration.model.Item2Role;
 import com.collaboration.model.Item2RoleRepository;
 import com.collaboration.model.ItemRepository;
-import com.collaboration.model.Role;
-import com.collaboration.model.RoleRepository;
+import com.collaboration.model.User;
+import com.collaboration.model.UserDTO;
+import com.collaboration.model.UserRepository;
 
 @Service
 public class UserService {
@@ -54,9 +52,6 @@ public class UserService {
 
   @Autowired
   private Item2RoleRepository item2RoleRepository;
-
-  @Autowired
-  private RoleRepository roleRepository;
 
   @Autowired
   PasswordEncoder passwordEncoder;
@@ -259,17 +254,6 @@ public class UserService {
     item2OrgaRepository.deleteByItemIdAndOrgaId(userDTO.getId(), userDTO.getOrgaid());
   }
 
-  public List<String> retrieveUserRoles(final long userId) throws CollaborationException {
-    // Check if exists
-    userRepository.findById(userId).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
-   
-    var item = itemRepository.findByItidAndUserornonuserid(AppConfig.ITEMTYPE_USER, userId).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
-    
-    var roleIds = item2RoleRepository.findAllByItemid(item.getId()).stream().map(Item2Role::getRoleid).toList();
-    
-    return roleRepository.findAllById(roleIds).stream().map(Role::getRolename).toList();
-  }
-  
   private UserDTO convertToDTO(final User user) {
    UserDTO userDTO = modelMapper.map(user, UserDTO.class);
    return userDTO;

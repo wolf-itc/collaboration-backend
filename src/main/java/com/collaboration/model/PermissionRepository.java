@@ -18,11 +18,13 @@ public interface PermissionRepository extends JpaRepository<Permission, Long> {
 
   // For operation on a special item
   @Query("SELECT p FROM Permission p WHERE p.itemtypeid = :itemtypeid AND (p.itemid = :itemid OR p.itemid IS NULL) AND p.roleid IN :roleids")
-  public List<Permission> findByAndItemtypeidAndItemidAndRoleidIn(final long itemtypeid, final long itemid, final List<Long> roleids);
+  public List<Permission> findByItemtypeidAndItemidAndRoleidIn(final long itemtypeid, final long itemid, final List<Long> roleids);
 
   // For create operations
-  @Query("SELECT p FROM Permission p WHERE p.itemtypeid = :itemtypeid AND  p.itemid IS NULL AND p.roleid IN :roleids")
-  public List<Permission> findByAndItemtypeidAndRoleidIn(final long itemtypeid, final List<Long> roleids);
+  @Query("SELECT p FROM Permission p WHERE p.itemtypeid = :itemtypeid AND p.itemid IS NULL AND p.roleid IN :roleids")
+  public List<Permission> findByItemtypeidAndRoleidIn(final long itemtypeid, final List<Long> roleids);
 
-//  List<Permission> findByOrgaid(final long orgaid);
+  // Searches all permissions for requesting organization. Since permissions does not have orgaid itself, the roles have to  be joined
+  @Query("SELECT p FROM Permission p INNER JOIN Role r ON p.roleid=r.id WHERE r.orgaid = :orgaid")
+  List<Permission> findByOrgaid(final long orgaid);
 }

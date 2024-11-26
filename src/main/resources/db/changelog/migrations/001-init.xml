@@ -288,7 +288,13 @@
 
   <changeSet author="mw" id="mw-01-012">
     <sql>
-      INSERT INTO permission VALUES (1, 2, null, 1, 'CRUD');
+      INSERT INTO permission VALUES (1, 1, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 2, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 3, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 4, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 5, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 6, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (1, 7, null, 3, 'CRUD');
       SELECT setval('permission_id_seq', 1000, false);
     </sql>
   </changeSet>

@@ -10,36 +10,36 @@ package com.collaboration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
-import com.collaboration.model.Item2Role;
-import com.collaboration.model.Item2RoleRepository;
-import com.collaboration.model.Permission;
-import com.collaboration.model.PermissionRepository;
-import com.collaboration.model.RoleRepository;
-import com.collaboration.model.UserRepository;
+import com.collaboration.model.PermissionDTO;
+import com.collaboration.model.RoleDTO;
+import com.collaboration.service.PermissionService;
+import com.collaboration.service.RoleService;
+import com.collaboration.service.UserRoleOrchestrator;
+import com.collaboration.service.UserService;
 
 @Service
 public class PermissionEvaluator {
 
-  @Autowired
-  PermissionRepository permissionRepository;
+  private final UserRoleOrchestrator userRoleOrchestrator;
+  private final UserService userService;
+  private final RoleService roleService;
+  private final PermissionService permissionService;
 
-  @Autowired
-  UserRepository userRepository;
-  
-  @Autowired
-  RoleRepository roleRepository;
-
-  @Autowired
-  private Item2RoleRepository item2RoleRepository;
+  public PermissionEvaluator(final UserRoleOrchestrator userRoleOrchestrator, final UserService userService, final RoleService roleService, final PermissionService permissionService) {
+    this.userRoleOrchestrator = userRoleOrchestrator;
+    this.userService = userService;
+    this.roleService = roleService;
+    this.permissionService = permissionService;
+  }
 
   public long getCurrentUserId() throws CollaborationException {
     var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    var user = userRepository.findByUsername(username).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
+    var user = userService.getUserByUsername(username);
     return user.getId();
   }
 
@@ -76,17 +76,23 @@ public class PermissionEvaluator {
   private List<AccessType> getAccess(final long orgaId, final long itemtypeId, final Long itemId) throws CollaborationException {
     var userId = getCurrentUserId();
     var userroleIds= getUserRoleIds(userId, orgaId);
-    List<Permission> listPermission;
+    
+    // If current user is Yare-Admin, then he's got all rights
+    if (userroleIds.contains(AppConfig.ROLE_ADMIN)) {
+      return AccessType.getAllAccessTypes();
+    }
+    
+    List<PermissionDTO> listPermission;
     if (itemId == null) {
       // No special item given, so search for null (=item-independent permission)
-      listPermission = permissionRepository.findByAndItemtypeidAndRoleidIn(itemtypeId, userroleIds);
+      listPermission = permissionService.getByAndItemtypeidAndRoleidIn(itemtypeId, userroleIds);
     } else {
-      listPermission = permissionRepository.findByAndItemtypeidAndItemidAndRoleidIn(itemtypeId, itemId, userroleIds);
+      listPermission = permissionService.getByAndItemtypeidAndItemidAndRoleidIn(itemtypeId, itemId, userroleIds);
     }
     if (listPermission.isEmpty()) {
       throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED);
     }
-    String combinedPermissions = listPermission.stream().map(Permission::getPermission).collect(Collectors.joining());
+    String combinedPermissions = listPermission.stream().map(PermissionDTO::getPermission).collect(Collectors.joining());
     return getAccessTypes(combinedPermissions);
   }
   
@@ -96,16 +102,22 @@ public class PermissionEvaluator {
    * @param userId
    * @param orgaId
    * @return
+   * @throws CollaborationException 
    */
-  private List<Long> getUserRoleIds(final long userId, final long orgaId) {
+  private List<Long> getUserRoleIds(final long userId, final long orgaId) throws CollaborationException {
     // Spring security gives us all roles of current user. This could also be roles of another organization (is user is part of more than one organization)
     // var authentication = SecurityContextHolder.getContext().getAuthentication();
     // var roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).map(r->r.replace("ROLE_", "")).toList();
     // Get roles not from authorities, but form item2role
-    var userRoleIds = item2RoleRepository.findAllByItemid(userId).stream().map(Item2Role::getRoleid).toList();
+    var userRoleIds = userRoleOrchestrator.getUserRoles(userId).stream().map(RoleDTO::getId).toList();
+    
+    // Admin has all rights, so only return this, not filtered by any orgaId
+    if (userRoleIds.contains(AppConfig.ROLE_ADMIN)) {
+      return List.of(AppConfig.ROLE_ADMIN);
+    }
     
     // So retrieve all roles of requesting organization
-    var userRolesOfOrga = roleRepository.findByOrgaidAndIdIn(orgaId, userRoleIds).stream().map(r->r.getId()).toList();
+    var userRolesOfOrga = roleService.getRolesByOrgaIdAndRoleIds(orgaId, userRoleIds).stream().map(r->r.getId()).toList();
     
     // And match them both
     return userRolesOfOrga;

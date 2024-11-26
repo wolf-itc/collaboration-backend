@@ -10,7 +10,6 @@ package com.collaboration.controller;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,6 +26,7 @@ import com.collaboration.config.CollaborationException;
 import com.collaboration.config.EmailServiceImpl;
 import com.collaboration.model.RoleDTO;
 import com.collaboration.model.UserDTO;
+import com.collaboration.service.UserRoleOrchestrator;
 import com.collaboration.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -45,11 +45,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/users")
 public class MainController {
 
-  @Autowired
-  UserService userService;
+  private final UserService userService;
+  private final EmailServiceImpl emailService;
+  private final UserRoleOrchestrator userRoleOrchestrator;
 
-  @Autowired
-  EmailServiceImpl emailService;
+  public MainController(final UserService userService, final EmailServiceImpl emailService, final UserRoleOrchestrator userRoleOrchestrator) {
+    this.userService = userService;
+    this.emailService = emailService;
+    this.userRoleOrchestrator = userRoleOrchestrator;
+  }
 
   // APIs for guests
   // ----------------------------------------------------------
@@ -330,7 +334,7 @@ public class MainController {
   @GetMapping("/{id}/roles")
   public ResponseEntity<Object> retrieveUserRoles(final @PathVariable("id") long id) {
     try {
-      List<String> userRoles = userService.retrieveUserRoles(id);
+      List<String> userRoles = userRoleOrchestrator.getUserRoles(id).stream().map(RoleDTO::getRolename).toList();
       return new ResponseEntity<>(userRoles, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());

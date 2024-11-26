@@ -190,10 +190,9 @@ public class PermissionController {
   public ResponseEntity<Object> retrieveAllPermissions(final @PathVariable long orgaid) {
     try {
       // Check access
-      permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_ROLE, null);
+      permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_PERMISSION, null);
       
-      List<PermissionDTO> permissions = permissionService.getAllPermissions();
-//      List<PermissionDTO> permissions = permissionService.getAllPermissionsByOrgaId(orgaId);
+      List<PermissionDTO> permissions = permissionService.getAllPermissionsByOrgaId(orgaid);
       log.info("ok");
       return new ResponseEntity<>(permissions, HttpStatus.OK);
     } catch (CollaborationException e) {

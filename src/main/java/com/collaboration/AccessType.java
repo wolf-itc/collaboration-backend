@@ -7,6 +7,9 @@
  * ***************************************************************************/
 package com.collaboration;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum AccessType {
 
   CREATE('C'),
@@ -32,5 +35,9 @@ public enum AccessType {
         }
     }
     throw new IllegalArgumentException("No AccessType found with id: " + accessTypeId);
+  }
+
+  public static List<AccessType> getAllAccessTypes() {
+    return Arrays.asList(AccessType.values());
   }
 }

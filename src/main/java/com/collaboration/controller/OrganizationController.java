@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Tag(name = "Organization Management", description = "APIs for managing organizations")
+@Tag(name = "Organization Management (Admin only)", description = "APIs for managing organizations")
 @RequestMapping("/v1/organizations")
 public class OrganizationController {
 

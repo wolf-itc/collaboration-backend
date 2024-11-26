@@ -79,8 +79,16 @@ public class RoleService {
     return convertToDTO(role);
   }
 
+  public List<RoleDTO> getRolesByRoleIds(final List<Long> ids) throws CollaborationException {
+    return roleRepository.findAllById(ids).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+  }
+
   public List<RoleDTO> getAllRolesByOrgaId(final long orgaid) {
     return roleRepository.findByOrgaid(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+  }
+
+  public List<RoleDTO> getRolesByOrgaIdAndRoleIds(final long orgaId, List<Long> roleIds) {
+    return roleRepository.findByOrgaidAndIdIn(orgaId, roleIds).stream().map(this::convertToDTO).toList();
   }
 
   private Role convertFromDTO(final RoleDTO roleDTO) {
