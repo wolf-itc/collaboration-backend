@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.CollaborationException;
@@ -24,8 +23,11 @@ public class ItemTypeService {
 
   private final ModelMapper modelMapper = new ModelMapper();
 
-  @Autowired
-  private ItemTypeRepository itemTypeRepository;
+  private final ItemTypeRepository itemTypeRepository;
+  
+  public ItemTypeService(final ItemTypeRepository itemTypeRepository) {
+    this.itemTypeRepository = itemTypeRepository;
+  }
 
   public ItemTypeDTO createItemType(ItemTypeDTO itemTypeDTO) {
     ItemType itemType = convertFromDTO(itemTypeDTO);

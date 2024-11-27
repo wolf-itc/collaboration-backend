@@ -9,7 +9,6 @@ package com.collaboration.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,7 +26,6 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.config.CollaborationException.CollaborationExceptionReason;
 import com.collaboration.model.RoleDTO;
-import com.collaboration.service.OrganizationService;
 import com.collaboration.service.RoleService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,14 +44,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/roles")
 public class RoleController {
 
-  @Autowired
-  private RoleService roleService;
+  private final RoleService roleService;
+  private final PermissionEvaluator permissionEvaluator;
 
-  @Autowired
-  PermissionEvaluator permissionEvaluator;
-
-  @Autowired
-  OrganizationService organizationService;
+  public RoleController(final RoleService roleService, final PermissionEvaluator permissionEvaluator) {
+    this.roleService = roleService;
+    this.permissionEvaluator = permissionEvaluator;
+  }
 
   @Operation(summary = "Create new role")
   @SecurityRequirement(name = "basicAuth")
@@ -181,7 +178,7 @@ public class RoleController {
     }
   }
 
-  @Operation(summary = "Retrieve all roles by orgaid")
+  @Operation(summary = "Retrieve all roles for an organization")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(type = "array", implementation = RoleDTO.class))),

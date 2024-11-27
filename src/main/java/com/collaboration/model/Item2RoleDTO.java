@@ -12,6 +12,6 @@ import lombok.Data;
 @Data
 public class Item2RoleDTO {
     private long id;
-    private int itemId;
-    private int roleId;
+    private int itemid;
+    private int roleid;
 }

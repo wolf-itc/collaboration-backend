@@ -9,7 +9,6 @@ package com.collaboration.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -46,14 +45,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/permissions")
 public class PermissionController {
 
-  @Autowired
-  private PermissionService permissionService;
-
-  @Autowired
-  private RoleService roleService;
-
-  @Autowired
-  PermissionEvaluator permissionEvaluator;
+  private final PermissionService permissionService;
+  private final RoleService roleService;
+  private final PermissionEvaluator permissionEvaluator;
+  
+  public PermissionController(final PermissionService permissionService, final RoleService roleService, final PermissionEvaluator permissionEvaluator) {
+    this.permissionService = permissionService;
+    this.roleService = roleService;
+    this.permissionEvaluator = permissionEvaluator;
+  }
 
   @Operation(summary = "Create new permission")
   @SecurityRequirement(name = "basicAuth")

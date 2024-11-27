@@ -12,6 +12,6 @@ import lombok.Data;
 @Data
 public class Item2OrgaDTO {
     private long id;
-    private int itemId;
-    private int orgaId;
+    private int itemid;
+    private int orgaid;
 }

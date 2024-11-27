@@ -7,7 +7,12 @@
  * ***************************************************************************/
 package com.collaboration.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "item")
@@ -30,6 +35,9 @@ public class Item {
 
     public Item() {
     }
+
+//    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<Item2Orga> item2orga = new ArrayList<>();
 
     // Getters und Setters
     public long getId() {

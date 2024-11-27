@@ -31,8 +31,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    @Autowired
-    private DataSource dataSource;
+    private final DataSource dataSource;
+
+    public SecurityConfiguration(final DataSource dataSource) {
+      this.dataSource = dataSource;
+    }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -43,7 +46,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http.csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(r -> r.requestMatchers(
-        "/favicon.ico", "/v1/users/login", "/v1/users/activate-account/**", "/v1/users/prepare-password-reset", "/v1/users/reset-password/**").permitAll()
+        "/favicon.ico", "/v1/users/login", "/v1/users/activate-account/**", "/v1/users/prepare-password-reset", "/v1/users/reset-password/**", "/v1/users/retrieveMainMenu").permitAll()
       .requestMatchers(
         "/v1/users/**", "/v1/nonusers/**", "/v1/roles/**", "/v1/itemtypes/**", "/v1/permissions/**").hasRole("USER")
       .requestMatchers(

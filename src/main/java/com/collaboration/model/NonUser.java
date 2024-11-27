@@ -27,4 +27,8 @@ public class NonUser {
 
   @Column(name = "createdbyid", nullable = false)
   private int createdById; // ID of the user who created this record
+
+  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "item", referencedColumnName = "userornonuserid")
+  private Item Item;
 }

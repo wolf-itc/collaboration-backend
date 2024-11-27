@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.CollaborationException;
@@ -24,13 +23,14 @@ import com.collaboration.model.UserRepository;
 @Service
 public class AuthorityService {
 
-    private ModelMapper modelMapper = new ModelMapper();
-    
-    @Autowired
-    private AuthorityRepository authorityRepository;
+    private final ModelMapper modelMapper = new ModelMapper();
+    private final AuthorityRepository authorityRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    public AuthorityService(final AuthorityRepository authorityRepository, final UserRepository userRepository) {
+      this.authorityRepository = authorityRepository;
+      this.userRepository = userRepository;
+    }
 
     public AuthorityDTO createAuthority(final AuthorityDTO authority) throws CollaborationException {
       User user = userRepository.findByUsername(authority.getUsername()).stream().findFirst().orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));

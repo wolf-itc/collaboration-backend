@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.CollaborationException;
@@ -23,10 +22,13 @@ import com.collaboration.model.NonUserRepository;
 @Service
 public class NonUserService {
 
-  @Autowired
-  private NonUserRepository nonUserRepository;
+  private final ModelMapper modelMapper = new ModelMapper();
 
-  private ModelMapper modelMapper = new ModelMapper();
+  private final NonUserRepository nonUserRepository;
+
+  public NonUserService(final NonUserRepository nonUserRepository) {
+    this.nonUserRepository = nonUserRepository;
+  }
 
   // Create a new NonUser
   public NonUserDTO createNonUser(final NonUserDTO nonUserDTO) {
@@ -62,6 +64,10 @@ public class NonUserService {
   // Get all NonUsers
   public List<NonUserDTO> getAllNonUsers() {
     return nonUserRepository.findAll().stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+  }
+
+  public List<NonUserDTO> getAllNonUsersByOrgaId(final long orgaid) {
+    return nonUserRepository.findByOrgaid(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
   }
 
   // Find NonUsers by name

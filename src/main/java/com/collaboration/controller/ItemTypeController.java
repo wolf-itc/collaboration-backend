@@ -9,7 +9,6 @@ package com.collaboration.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -42,8 +41,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/v1/itemtypes")
 public class ItemTypeController {
 
-  @Autowired
-  private ItemTypeService itemTypeService;
+  private final ItemTypeService itemTypeService;
+
+  public ItemTypeController(final ItemTypeService itemTypeService) {
+    this.itemTypeService = itemTypeService;
+  }
 
   @Operation(summary = "Create new itemtype")
   @SecurityRequirement(name = "basicAuth")

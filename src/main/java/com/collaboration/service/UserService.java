@@ -15,7 +15,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,25 +37,24 @@ public class UserService {
 
   public static final int MAX_ALLOWED_FAIL_LOGINS = 4;
 
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private AuthorityRepository authorityRepository;
-
-  @Autowired
-  private ItemRepository itemRepository;
-
-  @Autowired
-  private Item2OrgaRepository item2OrgaRepository;
-
-  @Autowired
-  private Item2RoleRepository item2RoleRepository;
-
-  @Autowired
-  PasswordEncoder passwordEncoder;
-
   private ModelMapper modelMapper = new ModelMapper();
+
+  private final UserRepository userRepository;
+  private final AuthorityRepository authorityRepository;
+  private final ItemRepository itemRepository;
+  private final Item2OrgaRepository item2OrgaRepository;
+  private final Item2RoleRepository item2RoleRepository;
+  private final PasswordEncoder passwordEncoder;
+
+  public UserService(final UserRepository userRepository, final AuthorityRepository authorityRepository, final ItemRepository itemRepository, 
+      final Item2OrgaRepository item2OrgaRepository, final Item2RoleRepository item2RoleRepository, final PasswordEncoder passwordEncoder) {
+    this.userRepository = userRepository;
+    this.authorityRepository = authorityRepository;
+    this.itemRepository = itemRepository;
+    this.item2OrgaRepository = item2OrgaRepository;
+    this.item2RoleRepository = item2RoleRepository;
+    this.passwordEncoder = passwordEncoder;
+  }
 
   public UserDTO createUser(final UserDTO userDTO) throws CollaborationException {
     // Check if exists
@@ -251,7 +249,7 @@ public class UserService {
     userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
     
     // And delete the link to orga
-    item2OrgaRepository.deleteByItemIdAndOrgaId(userDTO.getId(), userDTO.getOrgaid());
+    item2OrgaRepository.deleteByItemidAndOrgaid(userDTO.getId(), userDTO.getOrgaid());
   }
 
   private UserDTO convertToDTO(final User user) {

@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.CollaborationException;
@@ -24,10 +23,13 @@ import com.collaboration.model.OrganizationRepository;
 @Service
 public class OrganizationService {
 
-  private ModelMapper modelMapper = new ModelMapper();
+  private final ModelMapper modelMapper = new ModelMapper();
 
-  @Autowired
-  private OrganizationRepository organizationRepository;
+  private final OrganizationRepository organizationRepository;
+
+  public OrganizationService(final OrganizationRepository organizationRepository) {
+    this.organizationRepository = organizationRepository;
+  }
 
   public OrganizationDTO createOrganization(final OrganizationDTO organization) {
     organization.setId(0);

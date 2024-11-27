@@ -12,5 +12,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface Item2OrgaRepository extends JpaRepository<Item2Orga, Long> {
-  void deleteByItemIdAndOrgaId(final long itemid, final long orgaid);
+  void deleteByItemidAndOrgaid(final long itemid, final long orgaid);
 }

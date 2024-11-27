@@ -12,6 +12,9 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,6 +40,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -344,4 +354,52 @@ public class MainController {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+
+  @GetMapping("/retrieveMainMenu")
+  public ResponseEntity<String> index() {
+    boolean isUser = false;
+    boolean isAdmin= false;
+    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if ((authentication == null) || !authentication.isAuthenticated()) {
+      log.error("Authentication-Error");
+      return new ResponseEntity<>("Authentication-Error! Please inform Admin!", HttpStatus.BAD_REQUEST);
+    }
+
+    if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+      log.info("isAdmin=true");
+      isAdmin = true;
+    }
+    else if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
+      log.info("isUser=true");
+      isUser = true;
+    }
+
+    try {
+      Resource menuCommon = new ClassPathResource("/static/menucommon.json");
+      Resource menuGuest  = new ClassPathResource("/static/menuguest.json");
+      Resource menuUser   = new ClassPathResource("/static/menuuser.json");
+      Resource menuAdmin  = new ClassPathResource("/static/menuadmin.json");
+      Reader readerCommon = new InputStreamReader(menuCommon.getInputStream(), UTF_8);
+      Reader readerGuest = new InputStreamReader(menuGuest.getInputStream(), UTF_8);
+      Reader readerUser = new InputStreamReader(menuUser.getInputStream(), UTF_8);
+      Reader readerAdmin = new InputStreamReader(menuAdmin.getInputStream(), UTF_8);
+      String s = "";
+      if (!isAdmin && !isUser) {
+        s= FileCopyUtils.copyToString(readerGuest) + "," + FileCopyUtils.copyToString(readerCommon);
+      } else if (isUser) {
+        s= FileCopyUtils.copyToString(readerUser) + "," + FileCopyUtils.copyToString(readerCommon);
+      } else {
+        s= FileCopyUtils.copyToString(readerUser) + "," + FileCopyUtils.copyToString(readerCommon) + "," + FileCopyUtils.copyToString(readerAdmin);
+      }
+      return new ResponseEntity<>("[" + s + "]", HttpStatus.OK);
+    } catch (IOException e) {
+      log.error(e.getMessage());
+      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+
+
 }

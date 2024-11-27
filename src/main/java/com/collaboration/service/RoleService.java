@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,11 +25,13 @@ public class RoleService {
 
   private final ModelMapper modelMapper = new ModelMapper();
 
-  @Autowired
-  OrganizationService organizationService;
+  private final OrganizationService organizationService;
+  private final RoleRepository roleRepository;
 
-  @Autowired
-  private RoleRepository roleRepository;
+  public RoleService(final OrganizationService organizationService, final RoleRepository roleRepository) {
+    this.organizationService = organizationService;
+    this.roleRepository = roleRepository;
+  }
 
   public RoleDTO createRole(final RoleDTO roleDTO) throws CollaborationException {
     // Check role only contains valid characters

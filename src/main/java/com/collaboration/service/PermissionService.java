@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.CollaborationException;
@@ -22,10 +21,13 @@ import com.collaboration.model.PermissionRepository;
 @Service
 public class PermissionService {
 
-    private ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
     
-    @Autowired
-    private PermissionRepository permissionRepository;
+    private final PermissionRepository permissionRepository;
+
+    public PermissionService(final PermissionRepository permissionRepository) {
+      this.permissionRepository = permissionRepository;
+    }
 
     public PermissionDTO createPermission(final PermissionDTO permissionDTO) throws CollaborationException {
       Permission permission = convertFromDTO(permissionDTO);

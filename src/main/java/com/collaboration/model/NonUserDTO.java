@@ -15,4 +15,7 @@ public class NonUserDTO {
     private String name;       // Name of the non-user
     private String content;    // Content associated with the non-user
     private int createdById;   // ID of the creator
+    
+    // The orgaid from which the request comes
+    private long orgaid;
 }
