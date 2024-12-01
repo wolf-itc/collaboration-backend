@@ -15,7 +15,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface Item2RoleRepository extends JpaRepository<Item2Role, Long> {
     
-  void deleteByItemidAndRoleid(final long itemid, final long roleid);
-    
-  List<Item2Role> findAllByItemid(final long itemid);
+  List<Item2Role> findAllByItemId(final long itemId);
+
+  int deleteByItemIdAndRoleId(final long itemId, final long roleId);
+
+  int deleteAllByItemId(final long itemId);
 }

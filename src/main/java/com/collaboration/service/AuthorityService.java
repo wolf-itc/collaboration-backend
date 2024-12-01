@@ -65,7 +65,7 @@ public class AuthorityService {
     }
 
     public List<AuthorityDTO> getAuthoritiesByUserId(final long userid) {
-        return authorityRepository.findByUserid(userid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+        return authorityRepository.findByUserId(userid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
     }
 
     private Authority convertFromDTO(final AuthorityDTO authorityDTO) {

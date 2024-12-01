@@ -13,55 +13,34 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "item2orga")
 public class Item2Orga {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
 
-    @Column(name = "itemid", nullable = false)
-    private long itemid;
+//  @ManyToOne(fetch = FetchType.EAGER)
+//  @JoinColumn(name = "itemid", referencedColumnName = "id")
+//  private Item item;
 
-    @Column(name = "orgaid", nullable = false)
-    private long orgaid;
-/*
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "itemid")
-    private Item item;
-*/
-    public Item2Orga(long id, long itemid, long orgaid) {
-      super();
-      this.id = id;
-      this.itemid = itemid;
-//      this.item.setItid(itemid);
-      this.orgaid = orgaid;
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id;
 
-    // Getters und Setters
-    public long getId() {
-        return id;
-    }
+  @Column(name = "orgaid", nullable = false)
+  private long orgaId;
 
-    public void setId(long id) {
-        this.id = id;
-    }
+  @Column(name = "itemid", nullable = false) //(insertable=false, updatable=false)
+  private long itemId;
 
-    public long getItemId() {
-        return itemid;
-    }
-
-    public void setItemId(long itemid) {
-        this.itemid = itemid;
-    }
-
-    public long getOrgaId() {
-        return orgaid;
-    }
-
-    public void setOrgaId(long orgaid) {
-        this.orgaid = orgaid;
-    }
-
+  
+  public Item2Orga() {
+  }
+  
+  public Item2Orga(long id, long itemId, long orgaId) {
+    this.id = id;
+    this.itemId = itemId;
+    this.orgaId = orgaId;
+  }
 }

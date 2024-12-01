@@ -11,13 +11,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
 
-  List<Role> findByOrgaid(final long orgaid);
+  List<Role> findByOrgaId(final long orgaid);
   
-  List<Role> findByOrgaidAndRolenameIn(final long orgaid, final List<String> rolenames);
+  List<Role> findByOrgaIdAndRolenameIn(final long orgaId, final List<String> rolenames);
   
-  List<Role> findByOrgaidAndIdIn(final long orgaid, final List<Long> ids);
+  List<Role> findByOrgaIdAndIdIn(final long orgaId, final List<Long> ids);
+  
+  Optional<Role> findRoleByRolenameAndOrgaId(final String rolename, long orgaId);
 }

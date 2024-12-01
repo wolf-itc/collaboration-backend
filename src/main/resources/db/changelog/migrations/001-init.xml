@@ -114,9 +114,6 @@
 			</column>
 			<column name="description" type="VARCHAR(2000)" />
 			<column name="logo" type="BYTEA" />
-			<column name="prefix" type="VARCHAR(20)">
-				<constraints nullable="false" />
-			</column>
 		</createTable>
 		<addUniqueConstraint 
       constraintName="uc_organization" 
@@ -161,9 +158,8 @@
 			INSERT INTO itemtype VALUES (2, 1, 'ROLE');
 			INSERT INTO itemtype VALUES (3, 1, 'PERMISSION');
 			INSERT INTO itemtype VALUES (4, 1, 'AUTHORITY');
-      INSERT INTO itemtype VALUES (5, 1, 'NONUSER');
-      INSERT INTO itemtype VALUES (6, 1, 'ITEMTYPE');
-			INSERT INTO itemtype VALUES (7, 1, 'DOCUMENT');
+      INSERT INTO itemtype VALUES (5, 1, 'ITEMTYPE');
+			INSERT INTO itemtype VALUES (6, 1, 'DOCUMENT');
 			INSERT INTO itemtype VALUES (10, 1, 'Local/Regional Group');
 			INSERT INTO itemtype VALUES (11, 1, 'Country Group');
 			INSERT INTO itemtype VALUES (12, 1, 'Federal Group');
@@ -199,7 +195,7 @@
 		<addUniqueConstraint 
       constraintName="uc_role" 
 		  tableName="role"
-			columnNames="rolename" 
+			columnNames="rolename, orgaid" 
 		/>
 		<addForeignKeyConstraint
 			constraintName="fk_role_organization" 
@@ -310,10 +306,18 @@
 			<column name="content" type="VARCHAR(50000)">
 				<constraints nullable="false" />
 			</column>
-			<column name="createdbyid" type="INT">
+      <column name="orgaid" type="int">
+        <constraints nullable="false" />
+      </column>
+			<column name="userid" type="INT">
 				<constraints nullable="false" />
 			</column>
 		</createTable>
+    <addUniqueConstraint 
+      constraintName="uc_nonuser" 
+      tableName="nonuser"
+      columnNames="name, orgaid" 
+    />
 	</changeSet>
 
   <changeSet author="mw" id="mw-01-014">
@@ -329,7 +333,7 @@
       </column>
     </createTable>
     <addUniqueConstraint 
-       constraintName="uc_item2orga" 
+      constraintName="uc_item2orga" 
       tableName="item2orga"
       columnNames="itemid, orgaid" 
     />

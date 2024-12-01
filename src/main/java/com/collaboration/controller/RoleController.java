@@ -64,7 +64,7 @@ public class RoleController {
   public ResponseEntity<Object> createRole(@RequestBody RoleDTO roleDTO) {
     try {
       // Check access
-      permissionEvaluator.mayCreate(roleDTO.getOrgaid(), AppConfig.ITEMTYPE_ROLE);
+      permissionEvaluator.mayCreate(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE);
       
       roleDTO.setId(0);
       roleDTO = roleService.createRole(roleDTO);
@@ -95,7 +95,7 @@ public class RoleController {
   public ResponseEntity<Object> updateRole(final @PathVariable long id, @RequestBody RoleDTO roleDTO) {
     try {
       // Check access
-      permissionEvaluator.mayUpdate(roleDTO.getOrgaid(), AppConfig.ITEMTYPE_ROLE, id);
+      permissionEvaluator.mayUpdate(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
       
       roleDTO.setId(id);
       roleDTO = roleService.updateRole(roleDTO);
@@ -127,7 +127,7 @@ public class RoleController {
     try {
       // Check access
       RoleDTO roleDTO = roleService.getRoleById(id);
-      permissionEvaluator.mayDelete(roleDTO.getOrgaid(), AppConfig.ITEMTYPE_ROLE, id);
+      permissionEvaluator.mayDelete(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
 
       roleService.deleteRole(id);
       log.info("Role deleted successfully");
@@ -159,10 +159,7 @@ public class RoleController {
       RoleDTO roleDTO = roleService.getRoleById(id);
       
       // Check access
-      permissionEvaluator.mayRead(roleDTO.getOrgaid(), AppConfig.ITEMTYPE_ROLE, id);
-
-      // Remove the organization prefix
-      cutPrefix(roleDTO);
+      permissionEvaluator.mayRead(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
       log.info("Role retrieved successfully");
       
       return new ResponseEntity<>(roleDTO, HttpStatus.OK);
@@ -195,9 +192,6 @@ public class RoleController {
       List<RoleDTO> roles = roleService.getAllRolesByOrgaId(orgaid);
       log.info("Roles retrieved for orgaId: {}", orgaid);
 
-      // Remove the organization prefix
-      roles.forEach(this::cutPrefix);
-      
       return new ResponseEntity<>(roles, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
@@ -210,13 +204,4 @@ public class RoleController {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  
-  private void cutPrefix(final RoleDTO roleDTO) {
-    // Cut prefix if existing
-    var p = roleDTO.getRolename().indexOf('_');
-    if (p != -1) {
-      roleDTO.setRolename(roleDTO.getRolename().substring(p + 1));
-    }
-  }
-    
 }

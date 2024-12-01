@@ -12,7 +12,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Item2Role;
 import com.collaboration.model.Item2RoleRepository;
@@ -39,10 +38,10 @@ public class UserRoleOrchestrator {
     userService.getUserById(userId);
    
     // Retrieve item for this user
-    var item = itemService.getByItidAndUserornonuserid(AppConfig.ITEMTYPE_USER, userId);
+    var item = itemService.getItemByUserId(userId);
     
     // And the roles of this item
-    var roleIds = item2RoleRepository.findAllByItemid(item.getId()).stream().map(Item2Role::getRoleid).toList();
+    var roleIds = item2RoleRepository.findAllByItemId(item.getId()).stream().map(Item2Role::getRoleId).toList();
 
     // Map the roles to only the names of the roles
     return roleService.getRolesByRoleIds(roleIds);

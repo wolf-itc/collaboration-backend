@@ -24,16 +24,16 @@ public class UserDTO {
     private String address;
     private String telephone;
     private String mobile;
-    private String idcardnumber;
-    private OffsetDateTime lastlogin;
-    private OffsetDateTime lastfaillogin;
-    private OffsetDateTime lastnotifications;
-    private int faillogincount;
-    private String shownotifications;
-    private boolean showintro;
-    private boolean showhelp;
-    private boolean showclearname;
-    private boolean showcontact;
+    private String idcardNumber;
+    private OffsetDateTime lastLogin;
+    private OffsetDateTime lastFaillogin;
+    private OffsetDateTime lastNotifications;
+    private int failloginCount;
+    private String showNotifications;
+    private boolean showIntro;
+    private boolean showHelp;
+    private boolean showClearname;
+    private boolean showContact;
     private String language;
     private String activationkey;
     private String currentUsername;
@@ -42,5 +42,5 @@ public class UserDTO {
     private String mailBody;
     
     // The orgaid from which the request comes
-    private long orgaid;
+    private long orgaId;
 }

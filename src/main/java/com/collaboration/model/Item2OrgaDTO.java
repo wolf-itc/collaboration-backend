@@ -12,6 +12,13 @@ import lombok.Data;
 @Data
 public class Item2OrgaDTO {
     private long id;
-    private int itemid;
-    private int orgaid;
+    private long itemId;
+    private long orgaId;
+    private ItemDTO item;
+    
+    public Item2OrgaDTO(long id, long itemId, long orgaId) {
+      this.id = id;
+      this.itemId = itemId;
+      this.orgaId = orgaId;
+    }
 }

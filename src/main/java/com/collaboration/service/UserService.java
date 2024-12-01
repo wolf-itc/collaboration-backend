@@ -12,9 +12,11 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,12 +24,11 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Authority;
 import com.collaboration.model.AuthorityRepository;
-import com.collaboration.model.Item;
 import com.collaboration.model.Item2Orga;
+import com.collaboration.model.Item2OrgaDTO;
 import com.collaboration.model.Item2OrgaRepository;
-import com.collaboration.model.Item2Role;
-import com.collaboration.model.Item2RoleRepository;
-import com.collaboration.model.ItemRepository;
+import com.collaboration.model.Item2RoleDTO;
+import com.collaboration.model.ItemDTO;
 import com.collaboration.model.User;
 import com.collaboration.model.UserDTO;
 import com.collaboration.model.UserRepository;
@@ -41,56 +42,61 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final AuthorityRepository authorityRepository;
-  private final ItemRepository itemRepository;
+  private final ItemService itemService;
+  private final RoleService roleService;
   private final Item2OrgaRepository item2OrgaRepository;
-  private final Item2RoleRepository item2RoleRepository;
   private final PasswordEncoder passwordEncoder;
 
-  public UserService(final UserRepository userRepository, final AuthorityRepository authorityRepository, final ItemRepository itemRepository, 
-      final Item2OrgaRepository item2OrgaRepository, final Item2RoleRepository item2RoleRepository, final PasswordEncoder passwordEncoder) {
+  public UserService(final UserRepository userRepository, final AuthorityRepository authorityRepository, final ItemService itemService, 
+      final RoleService roleService, final Item2OrgaRepository item2OrgaRepository, final PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
-    this.itemRepository = itemRepository;
+    this.itemService = itemService;
+    this.roleService = roleService;
     this.item2OrgaRepository = item2OrgaRepository;
-    this.item2RoleRepository = item2RoleRepository;
     this.passwordEncoder = passwordEncoder;
   }
 
   public UserDTO createUser(final UserDTO userDTO) throws CollaborationException {
     // Check if exists
-    userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.USERNAME_ALREADY_EXISTS));
+    var userCheck = userRepository.findByUsername(userDTO.getUsername());
+    if (!userCheck.isEmpty()) {
+      throw new CollaborationException(CollaborationException.CollaborationExceptionReason.USERNAME_ALREADY_EXISTS);
+    }
 
     String enc = passwordEncoder.encode(userDTO.getPassword());
     User user = convertFromDTO(userDTO);
     user.setPassword(enc);
     user.setEnabled(false);
-    user.setShownotifications("D");
-    user.setShowclearname(false);
-    user.setShowcontact(false);
-    user.setShowhelp(true);
-    user.setShowintro(false);
-    user.setFaillogincount(0);
+    user.setShowNotifications("D");
+    user.setShowClearname(false);
+    user.setShowContact(false);
+    user.setShowHelp(true);
+    user.setShowIntro(false);
+    user.setFailloginCount(0);
     userRepository.save(user); 
 
     // All new users get role USER for default
     Authority authority = new Authority(user.getId(), user.getUsername(), "ROLE_USER");
     authorityRepository.save(authority);
-    
-    // Also all users are item automatically
-    Item item = new Item(0,AppConfig.ITEMTYPE_USER,user.getId());
-    item = itemRepository.save(item);
 
-    // Authority is only user for basic login, all other things go via the item2role
-    // So give role USER here, too
-    Item2Role item2role = new Item2Role(0, item.getId(), AppConfig.ROLE_USER);
-    item2RoleRepository.save(item2role);
+    // Retrieve the 'USER'-role for current organization
+    final var roleUser = roleService.getRoleByRolenameAndOrgaId("USER", userDTO.getOrgaId());
     
-    // And associate the new user to the requesting organization (if given)
-    if (userDTO.getOrgaid() != 0) {
-      Item2Orga item2orga = new Item2Orga(0L, user.getId(), userDTO.getOrgaid());
-      item2OrgaRepository.save(item2orga);
+    // Also all users are items automatically
+    ItemDTO item = new ItemDTO(0, AppConfig.ITEMTYPE_USER, user.getId());
+    if (userDTO.getOrgaId() != 0) {
+      Item2OrgaDTO item2orga = new Item2OrgaDTO(0L, item.getId(), userDTO.getOrgaId());
+      item2orga.setItem(item);
+      item.setItem2Orgas(Set.of(item2orga));
     }
+    // Entry in table 'Authority' is only used for basic login, all other things go via the item2role
+    // So give role USER here, too
+    Item2RoleDTO item2role = new Item2RoleDTO(0L, item.getId(), roleUser.getId());
+    item.setItem2Roles(Set.of(item2role));
     
+    item = itemService.createItem(item);
+
     return convertToDTO(user);
   }
 
@@ -111,12 +117,12 @@ public class UserService {
     maybeExistingOtherUser = userRepository.findByEmail(user.getEmail());
     if (maybeExistingOtherUser.stream().filter(u -> u.getId() != currentUser.getId()).count() > 0) {
       throw new CollaborationException(CollaborationException.CollaborationExceptionReason.EMAIL_ALREADY_EXISTS);
-    };
+    }
 
-    // There 4 fields cannot be set by the user. They are handles by the application
+    // These 4 fields cannot be set by the user. They are handles by the application
     user.setPassword(currentUser.getPassword());
-    user.setLastlogin(currentUser.getLastlogin());
-    user.setLastnotifications(currentUser.getLastnotifications());
+    user.setLastLogin(currentUser.getLastLogin());
+    user.setLastNotifications(currentUser.getLastNotifications());
     user.setEnabled(true);
     userRepository.save(convertFromDTO(user));
     
@@ -127,8 +133,13 @@ public class UserService {
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
-    authorityRepository.deleteAllByUsername(user.getUsername());
-    userRepository.delete(user);
+    authorityRepository.deleteAllByUserName(user.getUsername());
+
+    // First delete the item
+    itemService.deleteItemByUserId(user.getId());
+
+    // Then the non-user itself
+    userRepository.deleteById(user.getId());
     
     return convertToDTO(user);
   }
@@ -153,9 +164,9 @@ public class UserService {
     var foundUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
     if (!passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-      int newFaillogincount = foundUser.getFaillogincount()+ 1;
-      foundUser.setFaillogincount(newFaillogincount);
-      foundUser.setLastfaillogin(OffsetDateTime.now(ZoneOffset.UTC));
+      int newFaillogincount = foundUser.getFailloginCount()+ 1;
+      foundUser.setFailloginCount(newFaillogincount);
+      foundUser.setLastFaillogin(OffsetDateTime.now(ZoneOffset.UTC));
       if (newFaillogincount > MAX_ALLOWED_FAIL_LOGINS) {
         foundUser.setEnabled(false);
       }
@@ -168,16 +179,16 @@ public class UserService {
     }
 
     if (!foundUser.isEnabled()) {
-      if (foundUser.getFaillogincount() > MAX_ALLOWED_FAIL_LOGINS) {
+      if (foundUser.getFailloginCount() > MAX_ALLOWED_FAIL_LOGINS) {
         throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_IS_LOCKED);
       } else {
         throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_IS_NOT_ENABLED);
       }
     }
 
-    foundUser.setFaillogincount(0);
-    foundUser.setLastfaillogin(null);
-    foundUser.setLastlogin(OffsetDateTime.now(ZoneOffset.UTC));
+    foundUser.setFailloginCount(0);
+    foundUser.setLastFaillogin(null);
+    foundUser.setLastLogin(OffsetDateTime.now(ZoneOffset.UTC));
     userRepository.save(foundUser);
 
     return foundUser.getLanguage().trim();
@@ -187,7 +198,7 @@ public class UserService {
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
-    if (user.getFaillogincount() > MAX_ALLOWED_FAIL_LOGINS) {
+    if (user.getFailloginCount() > MAX_ALLOWED_FAIL_LOGINS) {
       throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_IS_LOCKED);
     } else {
       user.setEnabled(true);
@@ -229,7 +240,30 @@ public class UserService {
     userRepository.save(oldUser);
   }
 
-  public String generateTempPassword() {
+  public long getCurrentUserId() throws CollaborationException {
+    var username = SecurityContextHolder.getContext().getAuthentication().getName();
+    var user = getUserByUsername(username);
+    return user.getId();
+  }
+
+  public void leaveOrganization(final UserDTO userDTO) throws CollaborationException {
+    // Check if exists
+    userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
+    
+    // Delete the link to orga
+    item2OrgaRepository.deleteByItemIdAndOrgaId(userDTO.getId(), userDTO.getOrgaId());
+  }
+
+  public void joinOrganization(final UserDTO userDTO) throws CollaborationException {
+    // Check if exists
+    userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
+    
+    // Insert the link to orga
+    var item2orga = new Item2Orga(0, userDTO.getId(), userDTO.getOrgaId());
+    item2OrgaRepository.save(item2orga);
+  }
+
+  private String generateTempPassword() {
     int leftLimit = 48; // numeral '0'
     int rightLimit = 122; // letter 'z'
     int targetStringLength = 16;
@@ -242,14 +276,6 @@ public class UserService {
         .toString();
 
     return generatedString;
-  }
-
-  public void leaveOrganization(final UserDTO userDTO) throws CollaborationException {
-    // Check if exists
-    userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
-    
-    // And delete the link to orga
-    item2OrgaRepository.deleteByItemidAndOrgaid(userDTO.getId(), userDTO.getOrgaid());
   }
 
   private UserDTO convertToDTO(final User user) {

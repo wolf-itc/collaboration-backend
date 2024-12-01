@@ -18,17 +18,20 @@ public class Authority {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private long userid;
-    private String username;
+    @Column(name = "userid", nullable = false)
+    private long userId;
+
+    @Column(name = "username", nullable = false)
+    private String userName;
 
     private String authority;
 
-    public Authority(long userid, String username, String authority) {
-        this.userid = userid;
-        this.username = username;
-        this.authority = authority;
+    public Authority() {
     }
 
-    public Authority() {
+    public Authority(long userid, String username, String authority) {
+        this.userId = userid;
+        this.userName = username;
+        this.authority = authority;
     }
 }

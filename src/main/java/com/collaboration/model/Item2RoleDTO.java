@@ -12,6 +12,15 @@ import lombok.Data;
 @Data
 public class Item2RoleDTO {
     private long id;
-    private int itemid;
-    private int roleid;
+    private long itemId;
+    private long roleId;
+    
+    public Item2RoleDTO() {
+    }
+    
+    public Item2RoleDTO(long id, long itemId, long roleId) {
+      this.id = id;
+      this.itemId = itemId;
+      this.roleId = roleId;
+    }
 }

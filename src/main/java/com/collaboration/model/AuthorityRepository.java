@@ -21,8 +21,8 @@ public interface AuthorityRepository extends JpaRepository<Authority,Long> {
 
     @Transactional
     @Modifying
-    @Query(nativeQuery=true, value="DELETE FROM Authorities WHERE username = :username")
-    void deleteAllByUsername(@Param("username") String username);
+    @Query(nativeQuery=true, value="DELETE FROM Authorities WHERE username = :userName")
+    void deleteAllByUserName(@Param("userName") String userName);
 
-    List<Authority> findByUserid(long userid);
+    List<Authority> findByUserId(long userId);
 }

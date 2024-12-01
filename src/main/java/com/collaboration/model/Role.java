@@ -8,7 +8,9 @@
 package com.collaboration.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "role")
 public class Role {
@@ -18,33 +20,8 @@ public class Role {
   private long id;
 
   @Column(name = "orgaid", nullable = false)
-  private long orgaid;
+  private long orgaId;
 
   @Column(name = "rolename", nullable = false, length = 100)
   private String rolename;
-
-  // Getters and Setters
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public long getOrgaid() {
-    return orgaid;
-  }
-
-  public void setOrgaid(long orgaid) {
-    this.orgaid = orgaid;
-  }
-
-  public String getRolename() {
-    return rolename;
-  }
-
-  public void setRolename(String rolename) {
-    this.rolename = rolename;
-  }
 }

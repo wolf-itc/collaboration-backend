@@ -19,19 +19,25 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private long itemtypeid;
-    private Long itemid; // Optional, therefore Long
-    private long roleid;
+    @Column(name = "itemtypeid", nullable = false)
+    private long itemtypeId;
 
+    @Column(name = "itemid")
+    private Long itemId; // Optional, therefore Long
+    
+    @Column(name = "roleid", nullable = false)
+    private long roleId;
+
+    @Column(name = "permission", nullable = false)
     private String permission;
 
-    public Permission(long itemtypeid, long itemid, Long roleid, String permission) {
-        this.itemtypeid = itemtypeid;
-        this.itemid = itemid;
-        this.roleid = roleid;
+    public Permission(long itemtypeid, long itemId, Long roleId, String permission) {
+        this.itemtypeId = itemtypeid;
+        this.itemId = itemId;
+        this.roleId = roleId;
         this.permission = permission;
     }
-
+    
     public Permission() {
     }
 }

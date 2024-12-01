@@ -10,7 +10,6 @@ package com.collaboration;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.collaboration.config.AppConfig;
@@ -35,12 +34,6 @@ public class PermissionEvaluator {
     this.userService = userService;
     this.roleService = roleService;
     this.permissionService = permissionService;
-  }
-
-  public long getCurrentUserId() throws CollaborationException {
-    var username = SecurityContextHolder.getContext().getAuthentication().getName();
-    var user = userService.getUserByUsername(username);
-    return user.getId();
   }
 
   public void mayCreate(final long orgaId, final long itemtypeId) throws CollaborationException {
@@ -74,11 +67,11 @@ public class PermissionEvaluator {
   }
 
   private List<AccessType> getAccess(final long orgaId, final long itemtypeId, final Long itemId) throws CollaborationException {
-    var userId = getCurrentUserId();
+    var userId = userService.getCurrentUserId();
     var userroleIds= getUserRoleIds(userId, orgaId);
     
     // If current user is Yare-Admin, then he's got all rights
-    if (userroleIds.contains(AppConfig.ROLE_ADMIN)) {
+    if (userroleIds.contains(AppConfig.ROLEID_YARE_ADMIN)) {
       return AccessType.getAllAccessTypes();
     }
     
@@ -112,8 +105,8 @@ public class PermissionEvaluator {
     var userRoleIds = userRoleOrchestrator.getUserRoles(userId).stream().map(RoleDTO::getId).toList();
     
     // Admin has all rights, so only return this, not filtered by any orgaId
-    if (userRoleIds.contains(AppConfig.ROLE_ADMIN)) {
-      return List.of(AppConfig.ROLE_ADMIN);
+    if (userRoleIds.contains(AppConfig.ROLEID_YARE_ADMIN)) {
+      return List.of(AppConfig.ROLEID_YARE_ADMIN);
     }
     
     // So retrieve all roles of requesting organization

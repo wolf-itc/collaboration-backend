@@ -12,8 +12,8 @@ import lombok.Data;
 @Data
 public class PermissionDTO {
     private long id;
-    private long itemtypeid;
-    private Long itemid; // Optional, therefore Long
-    private long roleid;
+    private long itemtypeId;
+    private Long itemId; // Optional, therefore Long
+    private long roleId;
     private String permission;
 }

@@ -1,5 +1,5 @@
 /**
- *  NonUserController
+ *  NonuserController
  *
  *  @author Martin Wolf
  *  
@@ -7,6 +7,7 @@
  * ***************************************************************************/
 package com.collaboration.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -22,13 +23,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.collaboration.PermissionEvaluator;
-import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.config.CollaborationException.CollaborationExceptionReason;
-import com.collaboration.model.NonUserDTO;
-import com.collaboration.service.NonUserService;
+import com.collaboration.model.NonuserDTO;
+import com.collaboration.service.NonuserService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -40,32 +41,32 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@Tag(name = "NonUsers (that means groups and other things) Management", description = "APIs for managing non-users")
+@Tag(name = "Nonusers (that means groups and other things) Management", description = "APIs for managing non-users")
 @RequestMapping("/v1/nonusers")
-public class NonUserController {
+public class NonuserController {
 
-  private final NonUserService nonUserService;
+  private final NonuserService nonuserService;
   private final PermissionEvaluator permissionEvaluator;
   
-  public NonUserController(final NonUserService nonUserService, final PermissionEvaluator permissionEvaluator) {
-    this.nonUserService = nonUserService;
+  public NonuserController(final NonuserService nonuserService, final PermissionEvaluator permissionEvaluator) {
+    this.nonuserService = nonuserService;
     this.permissionEvaluator=  permissionEvaluator;
   }
 
   @Operation(summary = "Create new nonuser")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "201", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "201", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PostMapping
-  public ResponseEntity<Object> createNonUser(@RequestBody NonUserDTO nonuserDTO) {
+  public ResponseEntity<Object> createNonuser(@RequestBody NonuserDTO nonuserDTO) {
     try {
       // Check access
-      permissionEvaluator.mayCreate(nonuserDTO.getOrgaid(), AppConfig.ITEMTYPE_NONUSER);
+      permissionEvaluator.mayCreate(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId());
       
-      nonuserDTO = nonUserService.createNonUser(nonuserDTO);
-      log.info("NonUser created successfully");
+      nonuserDTO = nonuserService.createNonuser(nonuserDTO);
+      log.info("Nonuser created successfully");
       return new ResponseEntity<>(nonuserDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
@@ -82,19 +83,20 @@ public class NonUserController {
   @Operation(summary = "Update nonuser")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PutMapping("/{id}")
-  public ResponseEntity<Object> updateNonUser(final @PathVariable long id, @RequestBody NonUserDTO nonuserDTO) {
+  public ResponseEntity<Object> updateNonuser(final @PathVariable long id, @RequestBody NonuserDTO nonuserDTO) {
     try {
       // Check access
-      permissionEvaluator.mayUpdate(nonuserDTO.getOrgaid(), AppConfig.ITEMTYPE_NONUSER, id);
+      NonuserDTO currentNonuserDTO = nonuserService.getNonuserById(id);
+      permissionEvaluator.mayUpdate(currentNonuserDTO.getOrgaId(), currentNonuserDTO.getItemtypeId(), id);
       
       nonuserDTO.setId(id);
-      nonuserDTO = nonUserService.updateNonUser(nonuserDTO);
-      log.info("NonUser updated successfully");
+      nonuserDTO = nonuserService.updateNonuser(nonuserDTO);
+      log.info("Nonuser updated successfully");
       return new ResponseEntity<>(nonuserDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
@@ -108,7 +110,7 @@ public class NonUserController {
     }
   }
 
-  @Operation(summary = "Delete a NonUser")
+  @Operation(summary = "Delete a Nonuser")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "ok"),
@@ -116,15 +118,15 @@ public class NonUserController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error")
   })
   @DeleteMapping("/{id}")
-  public ResponseEntity<Object> deleteNonUser(@PathVariable long id) {
+  public ResponseEntity<Object> deleteNonuser(@PathVariable long id) {
     try {
       // Check access
-      NonUserDTO nonUserDTO = nonUserService.getNonUserById(id);
-      permissionEvaluator.mayDelete(nonUserDTO.getOrgaid(), AppConfig.ITEMTYPE_NONUSER, id);
+      NonuserDTO nonuserDTO = nonuserService.getNonuserById(id);
+      permissionEvaluator.mayDelete(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId(), id);
 
-      nonUserService.deleteNonUser(id);
-      log.info("NonUser deleted successfully");
-      return new ResponseEntity<>("NonUser deleted successfully", HttpStatus.OK);
+      nonuserService.deleteNonuser(id);
+      log.info("Nonuser deleted successfully");
+      return new ResponseEntity<>("Nonuser deleted successfully", HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
@@ -140,20 +142,20 @@ public class NonUserController {
   @Operation(summary = "Retrieve nonuser")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @GetMapping("/{id}")
-  public ResponseEntity<Object> retrieveNonUser(final @PathVariable long id) {
+  public ResponseEntity<Object> retrieveNonuser(final @PathVariable long id) {
     try {
-      NonUserDTO nonUserDTO = nonUserService.getNonUserById(id);
+      NonuserDTO nonuserDTO = nonuserService.getNonuserById(id);
 
       // Check access
-      permissionEvaluator.mayRead(nonUserDTO.getOrgaid(), AppConfig.ITEMTYPE_NONUSER, id);
+      permissionEvaluator.mayRead(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId(), id);
 
-      log.info("NonUser retrieved successfully");
-      return new ResponseEntity<>(nonUserDTO, HttpStatus.OK);
+      log.info("Nonuser retrieved successfully");
+      return new ResponseEntity<>(nonuserDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
@@ -169,79 +171,83 @@ public class NonUserController {
   @Operation(summary = "Retrieve all non-users for an organization")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(type = "array", implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(type = "array", implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @GetMapping("/by-orgaid/{orgaid}")
-  public ResponseEntity<Object> retrieveAllNonUsers(final @PathVariable long orgaid) {
+  public ResponseEntity<Object> retrieveAllNonusers(@Parameter(description = "The orgaId here is not the orgaId in the nonuser itself, it is the orgaId connected over item2orga") final @PathVariable long orgaid) {
     try {
-      // Check access
-      permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_NONUSER, null);
-      
-      List<NonUserDTO> nonUsers = nonUserService.getAllNonUsersByOrgaId(orgaid);
-      log.info("NonUsers retrieved successfully");
-      return new ResponseEntity<>(nonUsers, HttpStatus.OK);
-    } catch (CollaborationException e) {
-      log.error(e.getMessage());
-      if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+      List<NonuserDTO> nonuserDTOs = nonuserService.getAllNonusersByOrgaId(orgaid);
+
+      // Check access for each found nonuser
+      var nonusersAllowed = new ArrayList<NonuserDTO>();
+      for ( NonuserDTO nonuserDTO: nonuserDTOs) {
+        try {
+          permissionEvaluator.mayRead(nonuserDTO.getItemtypeId(), nonuserDTO.getItemtypeId(), null);
+          nonusersAllowed.add(nonuserDTO);
+        } catch ( Exception ex ) {
+          log.error(ex.getMessage());
+        }
       }
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+      
+      log.info("Nonusers retrieved successfully");
+      return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Operation(summary = "Retrieve a NonUser by name")
+  @Operation(summary = "Retrieve a Nonuser by name")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error")
   })
   @GetMapping("/by-name/{name}")
-  public ResponseEntity<Object> retrieveNonUsersByName(@PathVariable String name) {
+  public ResponseEntity<Object> retrieveNonusersByName(@PathVariable String name) {
     try {
-      List<NonUserDTO> nonUsers = nonUserService.findNonUsersByName(name);
+      List<NonuserDTO> nonuserDTOs = nonuserService.getNonusersByName(name);
 
-      // Check access
-      permissionEvaluator.mayRead(1, AppConfig.ITEMTYPE_NONUSER, null);
-      
-      log.info("NonUsers retrieved for name: {}", name);
-      return new ResponseEntity<>(nonUsers, HttpStatus.OK);
-    } catch (CollaborationException e) {
-      log.error(e.getMessage());
-      if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+      // Check access for each found nonuser
+      var nonusersAllowed = new ArrayList<NonuserDTO>();
+      for ( NonuserDTO nonuserDTO: nonuserDTOs) {
+        try {
+          permissionEvaluator.mayRead(nonuserDTO.getItemtypeId(), nonuserDTO.getItemtypeId(), null);
+          nonusersAllowed.add(nonuserDTO);
+        } catch ( Exception ex ) {}
       }
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+      
+      log.info("Nonusers retrieved for name: {}", name);
+      return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  @Operation(summary = "Retrieve all nonusers by createdById")
+  @Operation(summary = "Retrieve all nonusers by userId")
   @SecurityRequirement(name = "basicAuth")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonUserDTO.class))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NonuserDTO.class))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error")
   })
-  @GetMapping("/by-createdbyid/{createdById}")
-  public ResponseEntity<Object> retrieveNonUsersByCreatedById(@PathVariable int createdById) {
+  @GetMapping("/by-userId/{userId}")
+  public ResponseEntity<Object> retrieveNonusersByuserId(@PathVariable int userId) {
     try {
-      // Check access
-      permissionEvaluator.mayRead(1, AppConfig.ITEMTYPE_NONUSER, null);
-      
-      List<NonUserDTO> nonUsers = nonUserService.findNonUsersByCreatedById(createdById);
-      log.info("NonUsers retrieved for createdById: {}", createdById);
-      return new ResponseEntity<>(nonUsers, HttpStatus.OK);
-    } catch (CollaborationException e) {
-      log.error(e.getMessage());
-      if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+      List<NonuserDTO> nonuserDTOs = nonuserService.getNonusersByuserId(userId);
+
+      // Check access for each found nonuser
+      var nonusersAllowed = new ArrayList<NonuserDTO>();
+      for ( NonuserDTO nonuserDTO: nonuserDTOs) {
+        try {
+          permissionEvaluator.mayRead(nonuserDTO.getItemtypeId(), nonuserDTO.getItemtypeId(), null);
+          nonusersAllowed.add(nonuserDTO);
+        } catch ( Exception ex ) {}
       }
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+      
+      log.info("Nonusers retrieved for userId: {}", userId);
+      return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -46,7 +46,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http.csrf(AbstractHttpConfigurer::disable)
       .authorizeHttpRequests(r -> r.requestMatchers(
-        "/favicon.ico", "/v1/users/login", "/v1/users/activate-account/**", "/v1/users/prepare-password-reset", "/v1/users/reset-password/**", "/v1/users/retrieveMainMenu").permitAll()
+          "/v1/users", "/favicon.ico", "/v1/users/login", "/v1/users/activate-account/**", "/v1/users/prepare-password-reset", "/v1/users/reset-password/**", "/v1/users/retrieveMainMenu").permitAll()
       .requestMatchers(
         "/v1/users/**", "/v1/nonusers/**", "/v1/roles/**", "/v1/itemtypes/**", "/v1/permissions/**").hasRole("USER")
       .requestMatchers(

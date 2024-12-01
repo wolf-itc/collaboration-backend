@@ -13,54 +13,34 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "item")
 public class Item {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
 
-    @Column(name = "itid", nullable = false)
-    private long itid;
+//  @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+//  private Set<Item2Orga> item2orga = new HashSet<>();
 
-    @Column(name = "userornonuserid", nullable = false)
-    private long userornonuserid;
 
-    public Item(long id, long itid, long userornonuserid) {
-      this.id = id;
-      this.itid = itid;
-      this.userornonuserid = userornonuserid;
-    }
-
-    public Item() {
-    }
-
-//    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Item2Orga> item2orga = new ArrayList<>();
-
-    // Getters und Setters
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getItid() {
-        return itid;
-    }
-
-    public void setItid(long itid) {
-        this.itid = itid;
-    }
-
-    public long getUserornonuserid() {
-        return userornonuserid;
-    }
-
-    public void setUserornonuserid(long userornonuserid) {
-        this.userornonuserid = userornonuserid;
-    }
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private long id;
+  
+  @Column(name = "itid", nullable = false)
+  private long itId;
+  
+  @Column(name = "userornonuserid", nullable = false)
+  private long userOrNonuserId;
+  
+  
+  public Item() {
+  }
+  
+  public Item(final long id, final long itId, final long userOrNonuserId) {
+    this.id = id;
+    this.itId = itId;
+    this.userOrNonuserId = userOrNonuserId;
+  }
 }

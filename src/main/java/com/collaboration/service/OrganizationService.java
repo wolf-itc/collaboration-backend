@@ -19,6 +19,7 @@ import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Organization;
 import com.collaboration.model.OrganizationDTO;
 import com.collaboration.model.OrganizationRepository;
+import com.collaboration.model.RoleDTO;
 
 @Service
 public class OrganizationService {
@@ -26,14 +27,24 @@ public class OrganizationService {
   private final ModelMapper modelMapper = new ModelMapper();
 
   private final OrganizationRepository organizationRepository;
+  private final RoleService roleService;
 
-  public OrganizationService(final OrganizationRepository organizationRepository) {
+  public OrganizationService(final OrganizationRepository organizationRepository, RoleService roleService) {
     this.organizationRepository = organizationRepository;
+    this.roleService = roleService;
   }
 
-  public OrganizationDTO createOrganization(final OrganizationDTO organization) {
-    organization.setId(0);
-    return convertToDTO(organizationRepository.save(convertFromDTO(organization)));
+  public OrganizationDTO createOrganization(final OrganizationDTO organizationDTO) throws CollaborationException {
+    organizationDTO.setId(0);
+    var organization = organizationRepository.save(convertFromDTO(organizationDTO));
+    
+    // Create the two main-roles for the organization
+    RoleDTO roleDTO = new RoleDTO(0L, organization.getId(), "USER");
+    roleService.createRole(roleDTO);
+    roleDTO = new RoleDTO(0L, organization.getId(), "ADMIN");
+    roleService.createRole(roleDTO);
+
+    return convertToDTO(organization);
   }
 
   public OrganizationDTO updateOrganization(final OrganizationDTO organization) throws CollaborationException {
@@ -57,10 +68,6 @@ public class OrganizationService {
 
   public List<OrganizationDTO> getAllOrganizations(){
     return organizationRepository.findAll().stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
-  }
-  
-  public String getOrganizationPrefix(final long orgaid) throws CollaborationException{
-    return getOrganizationById(orgaid).getPrefix();
   }
   
   private OrganizationDTO convertToDTO(final Organization organization) {

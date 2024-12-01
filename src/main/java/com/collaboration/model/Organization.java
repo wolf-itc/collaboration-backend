@@ -22,5 +22,4 @@ public class Organization {
   private String name;
   private String description;
   private byte[] logo;
-  private String prefix;
 }

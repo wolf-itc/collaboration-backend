@@ -67,7 +67,7 @@ public class PermissionController {
     try {
       // Check access
       // First, get the orga from the role
-      var orgaId = roleService.getRoleById(permissionDTO.getRoleid()).getOrgaid();
+      var orgaId = roleService.getRoleById(permissionDTO.getRoleId()).getOrgaId();
       permissionEvaluator.mayCreate(orgaId, AppConfig.ITEMTYPE_PERMISSION);
       
       permissionDTO = permissionService.createPermission(permissionDTO);
@@ -97,7 +97,7 @@ public class PermissionController {
     try {
       // Check access
       // First, get the orga from the role
-      var orgaId = roleService.getRoleById(permissionDTO.getRoleid()).getOrgaid();
+      var orgaId = roleService.getRoleById(permissionDTO.getRoleId()).getOrgaId();
       permissionEvaluator.mayUpdate(orgaId, AppConfig.ITEMTYPE_PERMISSION, id);
       
       permissionDTO.setId(id);
@@ -130,7 +130,7 @@ public class PermissionController {
 
       // Check access
       // First, get the orga from the role
-      var orgaId = roleService.getRoleById(permissionDTO.getRoleid()).getOrgaid();
+      var orgaId = roleService.getRoleById(permissionDTO.getRoleId()).getOrgaId();
       permissionEvaluator.mayDelete(orgaId, AppConfig.ITEMTYPE_PERMISSION, id);
 
       permissionService.deletePermission(id);
@@ -162,7 +162,7 @@ public class PermissionController {
 
       // Check access
       // First, get the orga from the role
-      var orgaId = roleService.getRoleById(permissionDTO.getRoleid()).getOrgaid();
+      var orgaId = roleService.getRoleById(permissionDTO.getRoleId()).getOrgaId();
       permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_PERMISSION, id);
 
       log.info("ok");

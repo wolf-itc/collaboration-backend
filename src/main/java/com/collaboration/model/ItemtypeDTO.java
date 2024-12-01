@@ -1,5 +1,5 @@
 /**
- *  ItemTypeDTO
+ *  ItemtypeDTO
  *
  *  @author Martin Wolf
  *  
@@ -10,8 +10,8 @@ package com.collaboration.model;
 import lombok.Data;
 
 @Data
-public class ItemTypeDTO {
+public class ItemtypeDTO {
     private long id;
-    private long orgaid;
+    private long orgaId;
     private String name;
 }

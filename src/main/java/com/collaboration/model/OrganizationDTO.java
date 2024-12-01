@@ -15,5 +15,4 @@ public class OrganizationDTO {
   private String name;
   private String description;
   private String logo;
-  private String prefix;
 }

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.collaboration.Helpers;
 import com.collaboration.config.CollaborationException;
@@ -25,20 +24,15 @@ public class RoleService {
 
   private final ModelMapper modelMapper = new ModelMapper();
 
-  private final OrganizationService organizationService;
   private final RoleRepository roleRepository;
 
-  public RoleService(final OrganizationService organizationService, final RoleRepository roleRepository) {
-    this.organizationService = organizationService;
+  public RoleService(final RoleRepository roleRepository) {
     this.roleRepository = roleRepository;
   }
 
   public RoleDTO createRole(final RoleDTO roleDTO) throws CollaborationException {
     // Check role only contains valid characters
     Helpers.ensureAlphabetic(roleDTO.getRolename());
-    
-    // Set prefix for organization
-    addOrganizationPrefix(roleDTO);
     
     Role role = convertFromDTO(roleDTO);
     roleRepository.save(role);
@@ -52,14 +46,6 @@ public class RoleService {
 
     // Check role only contains valid characters
     Helpers.ensureAlphabetic(roleDTO.getRolename());
-    
-    // Set prefix for organization
-    addOrganizationPrefix(roleDTO);
-    
-    var prefix = organizationService.getOrganizationPrefix(roleDTO.getOrgaid());
-    if (StringUtils.hasText(prefix)) {
-      roleDTO.setRolename(prefix + "_" + roleDTO.getRolename());
-    }
     
     return convertToDTO(roleRepository.save(convertFromDTO(roleDTO)));
   }
@@ -85,11 +71,16 @@ public class RoleService {
   }
 
   public List<RoleDTO> getAllRolesByOrgaId(final long orgaid) {
-    return roleRepository.findByOrgaid(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
+    return roleRepository.findByOrgaId(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
   }
 
   public List<RoleDTO> getRolesByOrgaIdAndRoleIds(final long orgaId, List<Long> roleIds) {
-    return roleRepository.findByOrgaidAndIdIn(orgaId, roleIds).stream().map(this::convertToDTO).toList();
+    return roleRepository.findByOrgaIdAndIdIn(orgaId, roleIds).stream().map(this::convertToDTO).toList();
+  }
+
+  public RoleDTO getRoleByRolenameAndOrgaId(final String rolename, final long id) throws CollaborationException {
+    Role role = roleRepository.findRoleByRolenameAndOrgaId(rolename, id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
+    return convertToDTO(role);
   }
 
   private Role convertFromDTO(final RoleDTO roleDTO) {
@@ -98,12 +89,5 @@ public class RoleService {
 
   private RoleDTO convertToDTO(final Role role) {
     return modelMapper.map(role, RoleDTO.class);
-  }
-  
-  private void addOrganizationPrefix(final RoleDTO roleDTO) throws CollaborationException {
-    var prefix = organizationService.getOrganizationPrefix(roleDTO.getOrgaid());
-    if (StringUtils.hasText(prefix)) {
-      roleDTO.setRolename(prefix + "_" + roleDTO.getRolename());
-    }
   }
 }

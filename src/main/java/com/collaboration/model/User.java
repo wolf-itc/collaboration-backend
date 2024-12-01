@@ -30,23 +30,37 @@ public class User {
   private String address;
   private String telephone;
   private String mobile;
-  private String idcardnumber;
 
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-  private OffsetDateTime lastlogin;
+  @Column(name = "idcardnumber", nullable = true)
+  private String idcardNumber;
 
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-  private OffsetDateTime lastfaillogin;
+  @Column(name = "lastlogin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+  private OffsetDateTime lastLogin;
 
-  @Column(columnDefinition = "TIMESTAMP WITH TIME ZONE")
-  private OffsetDateTime lastnotifications;
+  @Column(name = "lastfaillogin", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+  private OffsetDateTime lastFaillogin;
 
-  private int faillogincount;
-  private String shownotifications;
-  private boolean showintro;
-  private boolean showhelp;
-  private boolean showclearname;
-  private boolean showcontact;
+  @Column(name = "lastnotifications", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+  private OffsetDateTime lastNotifications;
+
+  @Column(name = "faillogincount", nullable = false)
+  private int failloginCount;
+
+  @Column(name = "shownotifications", nullable = false)
+  private String showNotifications;
+
+  @Column(name = "showintro", nullable = false)
+  private boolean showIntro;
+
+  @Column(name = "showhelp", nullable = false)
+  private boolean showHelp;
+  
+  @Column(name = "showclearname", nullable = false)
+  private boolean showClearname;
+
+  @Column(name = "showcontact", nullable = false)
+  private boolean showContact;
+
   private String language;
   private String activationkey;
   private String mailSubject;

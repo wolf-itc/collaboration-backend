@@ -1,5 +1,5 @@
 /**
- *  ItemTypeRepository
+ *  ItemtypeRepository
  *
  *  @author Martin Wolf
  *  
@@ -13,6 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ItemTypeRepository extends JpaRepository<ItemType, Long> {
-  List<ItemType> findByOrgaid(long orgaid);
+public interface ItemtypeRepository extends JpaRepository<Itemtype, Long> {
+  List<Itemtype> findByOrgaId(long orgaId);
 }

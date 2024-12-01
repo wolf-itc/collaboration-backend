@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class AuthorityDTO {
     private long id;
-    private long userid;
+    private long userId;
     private String username;
     private String authority;
 }
