@@ -26,11 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.collaboration.PermissionEvaluator;
 import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
-import com.collaboration.config.EmailServiceImpl;
 import com.collaboration.config.CollaborationException.CollaborationExceptionReason;
-import com.collaboration.model.ItemtypeDTO;
+import com.collaboration.config.EmailServiceImpl;
+import com.collaboration.model.Item2OrgaDTO;
 import com.collaboration.model.RoleDTO;
 import com.collaboration.model.UserDTO;
+import com.collaboration.service.ItemService;
 import com.collaboration.service.UserRoleOrchestrator;
 import com.collaboration.service.UserService;
 
@@ -51,13 +52,15 @@ import lombok.extern.slf4j.Slf4j;
 public class UserController {
 
   private final UserService userService;
+  private final ItemService itemService;
   private final EmailServiceImpl emailService;
   private final UserRoleOrchestrator userRoleOrchestrator;
   private final PermissionEvaluator permissionEvaluator;
 
-  public UserController(final UserService userService, final EmailServiceImpl emailService, 
+  public UserController(final UserService userService, final ItemService itemService, final EmailServiceImpl emailService, 
       final UserRoleOrchestrator userRoleOrchestrator, final PermissionEvaluator permissionEvaluator) {
     this.userService = userService;
+    this.itemService = itemService;
     this.emailService = emailService;
     this.userRoleOrchestrator = userRoleOrchestrator;
     this.permissionEvaluator = permissionEvaluator;
@@ -112,9 +115,10 @@ public class UserController {
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateUser(final @PathVariable long id, @RequestBody UserDTO userDTO) {
     try {
-      // Check access
-      // TODO: Check for all existing user2orga 
-      permissionEvaluator.mayUpdate(userDTO.getOrgaId(), AppConfig.ITEMTYPE_USER, id);
+      if (userService.getCurrentUserId() != id) {
+        // Only the user himself is allowed to update himself
+        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
+      }
       
       if (id != 0) {
         userDTO.setId(id);
@@ -144,10 +148,6 @@ public class UserController {
   @DeleteMapping("/{activationkey}")
   public ResponseEntity<Object> deleteAccount(final @PathVariable("activationkey") String activationKey) {
     try {
-      // Check access
-      // TODO: UserDTO userDTO = userService.getUserByActivationkey(id);
-      // permissionEvaluator.mayDelete(itemtypeDTO.getOrgaId(), AppConfig.ITEMTYPE_USER, userDTO.getId());
-
       UserDTO userDTO = userService.deleteAccount(activationKey);
       log.info("ok");
       return new ResponseEntity<>(String.format("User name=%s deleted successfully", userDTO.getUsername()), HttpStatus.OK);
@@ -173,13 +173,34 @@ public class UserController {
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveUser(final @PathVariable("id") long id) {
     try {
-      UserDTO u = userService.getUserById(id);
+      UserDTO userDTO = userService.getUserById(id);
 
       // Check access
-      permissionEvaluator.mayRead(u.getOrgaId(), AppConfig.ITEMTYPE_USER, id);
+      var accessAllowed = false;
+      if (userService.getCurrentUserId() == id) {
+        
+        // The current user may read himself
+        accessAllowed = true;
+      } else {
 
+        // If another user tries to read this user, then it is only possible if the both are in the same orga
+        var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+        var userOrgaIds = itemService.getItemByUserId(id).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+        for (long orgaId: currentUserOrgaIds) {
+          if (userOrgaIds.contains(orgaId)) {
+            try {
+              permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_USER, id);
+              accessAllowed = true;
+            } catch (Exception ex) {}
+          }
+        }
+      }
+      if (!accessAllowed) {
+        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
+      }
+      
       log.info("ok");
-      return new ResponseEntity<>(u, HttpStatus.OK);
+      return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
@@ -204,11 +225,23 @@ public class UserController {
       List<UserDTO> userDTOs = userService.getAllUser();
 
       // Check access for each found itemtypes
+      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
       var usersAllowed = new ArrayList<UserDTO>();
       for ( UserDTO userDTO: userDTOs) {
         try {
-          permissionEvaluator.mayRead(userDTO.getOrgaId(), AppConfig.ITEMTYPE_USER, userDTO.getId());
-          usersAllowed.add(userDTO);
+          var accessAllowed = false;
+          var userOrgaIds = itemService.getItemByUserId(userDTO.getId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+          for (long orgaId: currentUserOrgaIds) {
+            if (userOrgaIds.contains(orgaId)) {
+              try {
+                permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_USER, userDTO.getId());
+                accessAllowed = true;
+              } catch (Exception ex) {}
+            }
+          }
+          if (accessAllowed) {
+            usersAllowed.add(userDTO);
+          }
         } catch ( Exception ex ) {
           log.error(ex.getMessage());
         }
@@ -222,47 +255,18 @@ public class UserController {
     }
   }
 
-  @Operation(summary = "Retrieve user by username")
-  @SecurityRequirement(name = "basicAuth")
-  @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = RoleDTO.class))),
-    @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
-    @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
-  })
-  @GetMapping("/by-username/{username}")
-  public ResponseEntity<Object> retrieveUser(final @PathVariable("username") String username) {
-    try {
-      UserDTO u = userService.getUserByUsername(username);
-
-      // Check access
-      permissionEvaluator.mayRead(u.getOrgaId(), AppConfig.ITEMTYPE_USER, u.getId());
-      
-      log.info("ok");
-      return new ResponseEntity<>(u, HttpStatus.OK);
-    } catch (CollaborationException e) {
-      log.error(e.getMessage());
-      if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
-      }
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-    } catch (Exception e) {
-      log.error(e.getMessage());
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-
   @Operation(summary = "User login (only username and password has to be set here)")
   @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "ok (returning user's language)", content = @Content(mediaType = "application/json", schema = @Schema(type = "string", example = "en-US"))),
+    @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDTO.class))),
     @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PostMapping("/login")
   public ResponseEntity<Object> doLogin(final @RequestBody UserDTO user) {
     try {
-      String language = userService.doLogin(user);
+      UserDTO userDTO = userService.doLogin(user);
       log.info("ok");
-      return new ResponseEntity<>(language, HttpStatus.OK);
+      return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -399,7 +403,7 @@ public class UserController {
     }
   }
 
-  @Operation(summary = "Retrieve all role for giben user")
+  @Operation(summary = "Retrieve all role for given user")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
     @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
@@ -418,52 +422,4 @@ public class UserController {
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-
-/*
-  @GetMapping("/retrieveMainMenu")
-  public ResponseEntity<String> index() {
-    boolean isUser = false;
-    boolean isAdmin= false;
-    final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-    if ((authentication == null) || !authentication.isAuthenticated()) {
-      log.error("Authentication-Error");
-      return new ResponseEntity<>("Authentication-Error! Please inform Admin!", HttpStatus.BAD_REQUEST);
-    }
-
-    if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-      log.info("isAdmin=true");
-      isAdmin = true;
-    }
-    else if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER"))) {
-      log.info("isUser=true");
-      isUser = true;
-    }
-
-    try {
-      Resource menuCommon = new ClassPathResource("/static/menucommon.json");
-      Resource menuGuest  = new ClassPathResource("/static/menuguest.json");
-      Resource menuUser   = new ClassPathResource("/static/menuuser.json");
-      Resource menuAdmin  = new ClassPathResource("/static/menuadmin.json");
-      Reader readerCommon = new InputStreamReader(menuCommon.getInputStream(), UTF_8);
-      Reader readerGuest = new InputStreamReader(menuGuest.getInputStream(), UTF_8);
-      Reader readerUser = new InputStreamReader(menuUser.getInputStream(), UTF_8);
-      Reader readerAdmin = new InputStreamReader(menuAdmin.getInputStream(), UTF_8);
-      String s = "";
-      if (!isAdmin && !isUser) {
-        s= FileCopyUtils.copyToString(readerGuest) + "," + FileCopyUtils.copyToString(readerCommon);
-      } else if (isUser) {
-        s= FileCopyUtils.copyToString(readerUser) + "," + FileCopyUtils.copyToString(readerCommon);
-      } else {
-        s= FileCopyUtils.copyToString(readerUser) + "," + FileCopyUtils.copyToString(readerCommon) + "," + FileCopyUtils.copyToString(readerAdmin);
-      }
-      return new ResponseEntity<>("[" + s + "]", HttpStatus.OK);
-    } catch (IOException e) {
-      log.error(e.getMessage());
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-  }
-*/
-
-
 }

@@ -18,8 +18,10 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Item;
 import com.collaboration.model.Item2Orga;
+import com.collaboration.model.Item2OrgaDTO;
 import com.collaboration.model.Item2OrgaRepository;
 import com.collaboration.model.Item2Role;
+import com.collaboration.model.Item2RoleDTO;
 import com.collaboration.model.Item2RoleRepository;
 import com.collaboration.model.ItemDTO;
 import com.collaboration.model.ItemRepository;
@@ -71,7 +73,21 @@ public class ItemService {
     // Check if exists
     itemRepository.findById(itemDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
-    return convertToDTO(itemRepository.save(convertFromDTO(itemDTO)));
+    var item = itemRepository.save(convertFromDTO(itemDTO));
+    
+    // If present, save connections to oraganizations
+    itemDTO.getItem2Orgas().forEach(item2OrgaDTO -> {
+      Item2Orga item2orga = new Item2Orga(item2OrgaDTO.getId(), item.getId(), item2OrgaDTO.getOrgaId());
+      item2OrgaRepository.save(item2orga);
+    });
+    
+    // If present, save connections to roles
+    itemDTO.getItem2Roles().forEach(item2RoleDTO -> {
+      Item2Role item2role = new Item2Role(item2RoleDTO.getId(), item.getId(), item2RoleDTO.getRoleId());
+      item2RoleRepository.save(item2role);
+    });
+    
+    return convertToDTO(item);
   }
 
   @Transactional
@@ -136,6 +152,17 @@ public class ItemService {
   }
 
   private ItemDTO convertToDTO(final Item item) {
-    return modelMapper.map(item, ItemDTO.class);
+    var itemDTO = modelMapper.map(item, ItemDTO.class);
+    itemDTO.setItem2Roles(item2RoleRepository.findAllByItemId(item.getUserOrNonuserId()).stream().map(this::convertToDTO).toList());
+    itemDTO.setItem2Orgas(item2OrgaRepository.findAllByItemId(item.getUserOrNonuserId()).stream().map(this::convertToDTO).toList());
+    return itemDTO;
+  }
+
+  private Item2RoleDTO convertToDTO(final Item2Role item2role) {
+    return modelMapper.map(item2role, Item2RoleDTO.class);
+  }
+
+  private Item2OrgaDTO convertToDTO(final Item2Orga item2orga) {
+    return modelMapper.map(item2orga, Item2OrgaDTO.class);
   }
 }

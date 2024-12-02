@@ -9,7 +9,6 @@ package com.collaboration.service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -50,8 +49,7 @@ public class NonuserService {
     // Also all non-users are items automatically
     ItemDTO item = new ItemDTO(0, nonuserDTO.getItemtypeId(), nonuser.getId());
     Item2OrgaDTO item2orga = new Item2OrgaDTO(0L, item.getId(), nonuserDTO.getOrgaId());
-    item2orga.setItem(item);
-    item.setItem2Orgas(Set.of(item2orga));
+    item.setItem2Orgas(List.of(item2orga));
     item = itemService.createItem(item);
 
     return convertToDTO(nonuser);

@@ -7,8 +7,8 @@
  * ***************************************************************************/
 package com.collaboration.model;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Data;
 
@@ -18,8 +18,8 @@ public class ItemDTO {
   private long id;
   private long itId;
   private long userOrNonuserId;
-  private Set<Item2OrgaDTO> item2Orgas = new HashSet<>();
-  private Set<Item2RoleDTO> item2Roles = new HashSet<>();
+  private List<Item2OrgaDTO> item2Orgas = new ArrayList<>();
+  private List<Item2RoleDTO> item2Roles = new ArrayList<>();
 
   public ItemDTO() {
   }

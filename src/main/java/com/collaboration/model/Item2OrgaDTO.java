@@ -14,7 +14,9 @@ public class Item2OrgaDTO {
     private long id;
     private long itemId;
     private long orgaId;
-    private ItemDTO item;
+    
+    public Item2OrgaDTO() {
+    }
     
     public Item2OrgaDTO(long id, long itemId, long orgaId) {
       this.id = id;

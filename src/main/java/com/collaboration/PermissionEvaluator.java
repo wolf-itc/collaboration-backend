@@ -42,6 +42,15 @@ public class PermissionEvaluator {
     }
   }
 
+  /**
+   * Checks if read-access is allowed for asked object(-type) 
+   * 
+   * @param orgaId  The organization the requested object belongs to
+   * @param itemtypeId
+   * @param itemId
+   * 
+   * @throws CollaborationException
+   */
   public void mayRead(final long orgaId, final long itemtypeId, final Long itemId) throws CollaborationException {
     if (!getAccess(orgaId, itemtypeId, itemId).contains(AccessType.READ)) {
       throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));

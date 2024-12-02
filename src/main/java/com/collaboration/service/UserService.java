@@ -12,7 +12,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -87,13 +86,12 @@ public class UserService {
     ItemDTO item = new ItemDTO(0, AppConfig.ITEMTYPE_USER, user.getId());
     if (userDTO.getOrgaId() != 0) {
       Item2OrgaDTO item2orga = new Item2OrgaDTO(0L, item.getId(), userDTO.getOrgaId());
-      item2orga.setItem(item);
-      item.setItem2Orgas(Set.of(item2orga));
+      item.setItem2Orgas(List.of(item2orga));
     }
     // Entry in table 'Authority' is only used for basic login, all other things go via the item2role
     // So give role USER here, too
     Item2RoleDTO item2role = new Item2RoleDTO(0L, item.getId(), roleUser.getId());
-    item.setItem2Roles(Set.of(item2role));
+    item.setItem2Roles(List.of(item2role));
     
     item = itemService.createItem(item);
 
@@ -129,16 +127,17 @@ public class UserService {
     return user;
   }
 
+  // TODO: Really hard deletion?
   public UserDTO deleteAccount(final String activationKey) throws CollaborationException {
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
-    authorityRepository.deleteAllByUserName(user.getUsername());
+    authorityRepository.deleteById(user.getId());
 
     // First delete the item
     itemService.deleteItemByUserId(user.getId());
 
-    // Then the non-user itself
+    // Then the user itself
     userRepository.deleteById(user.getId());
     
     return convertToDTO(user);
@@ -160,17 +159,17 @@ public class UserService {
     return userRepository.findAll().stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
   }
 
-  public String doLogin(final UserDTO user) throws CollaborationException {
-    var foundUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
+  public UserDTO doLogin(final UserDTO userDTO) throws CollaborationException {
+    var user = userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
-    if (!passwordEncoder.matches(user.getPassword(), foundUser.getPassword())) {
-      int newFaillogincount = foundUser.getFailloginCount()+ 1;
-      foundUser.setFailloginCount(newFaillogincount);
-      foundUser.setLastFaillogin(OffsetDateTime.now(ZoneOffset.UTC));
+    if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+      int newFaillogincount = user.getFailloginCount()+ 1;
+      user.setFailloginCount(newFaillogincount);
+      user.setLastFaillogin(OffsetDateTime.now(ZoneOffset.UTC));
       if (newFaillogincount > MAX_ALLOWED_FAIL_LOGINS) {
-        foundUser.setEnabled(false);
+        user.setEnabled(false);
       }
-      userRepository.save(foundUser);
+      userRepository.save(user);
       if (newFaillogincount > MAX_ALLOWED_FAIL_LOGINS) {
         throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_HAS_BEEN_LOCKED);
       } else {
@@ -178,20 +177,20 @@ public class UserService {
       }
     }
 
-    if (!foundUser.isEnabled()) {
-      if (foundUser.getFailloginCount() > MAX_ALLOWED_FAIL_LOGINS) {
+    if (!user.isEnabled()) {
+      if (user.getFailloginCount() > MAX_ALLOWED_FAIL_LOGINS) {
         throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_IS_LOCKED);
       } else {
         throw new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCOUNT_IS_NOT_ENABLED);
       }
     }
 
-    foundUser.setFailloginCount(0);
-    foundUser.setLastFaillogin(null);
-    foundUser.setLastLogin(OffsetDateTime.now(ZoneOffset.UTC));
-    userRepository.save(foundUser);
+    user.setFailloginCount(0);
+    user.setLastFaillogin(null);
+    user.setLastLogin(OffsetDateTime.now(ZoneOffset.UTC));
+    userRepository.save(user);
 
-    return foundUser.getLanguage().trim();
+    return convertToDTO(user);
   }
 
   public void activateAccount(final String activationKey) throws CollaborationException {
