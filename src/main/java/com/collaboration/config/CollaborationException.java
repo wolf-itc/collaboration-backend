@@ -20,7 +20,7 @@ public class CollaborationException extends Exception {
     ACCOUNT_HAS_BEEN_LOCKED( 7 ), // actual done because of too much fail logins
     ACCOUNT_IS_LOCKED( 8 ), // done before because of too much fail logins
     UNKNOWN_EMAIL( 9),
-    PW_NOT_CHANGEABLE(10),
+    FREE_FOR_USE(10), // <<---- take this for new error!
 	  NOT_FOUND(11),
     ACCESS_DENIED(12),
     INVALID_VALUE(13);

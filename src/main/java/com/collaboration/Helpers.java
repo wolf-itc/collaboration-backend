@@ -1,5 +1,5 @@
 /**
- *  MainApplication - SpringBoot-Start-Class
+ *  Helpers - Collection if small helper methods
  *
  *  @author Martin Wolf
  *  

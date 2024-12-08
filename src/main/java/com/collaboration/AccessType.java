@@ -1,5 +1,5 @@
 /**
- *  MainApplication - SpringBoot-Start-Class
+ *  AccessType - Enum for the possible access-rights
  *
  *  @author Martin Wolf
  *  

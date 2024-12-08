@@ -115,8 +115,8 @@ public class UserController {
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateUser(final @PathVariable long id, @RequestBody UserDTO userDTO) {
     try {
+      // Check access. Only the user himself is allowed to update himself
       if (userService.getCurrentUserId() != id) {
-        // Only the user himself is allowed to update himself
         throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
       }
       
@@ -148,6 +148,8 @@ public class UserController {
   @DeleteMapping("/{activationkey}")
   public ResponseEntity<Object> deleteAccount(final @PathVariable("activationkey") String activationKey) {
     try {
+      // Access has here, whoever sends the activationkey
+      
       UserDTO userDTO = userService.deleteAccount(activationKey);
       log.info("ok");
       return new ResponseEntity<>(String.format("User name=%s deleted successfully", userDTO.getUsername()), HttpStatus.OK);
@@ -175,29 +177,7 @@ public class UserController {
     try {
       UserDTO userDTO = userService.getUserById(id);
 
-      // Check access
-      var accessAllowed = false;
-      if (userService.getCurrentUserId() == id) {
-        
-        // The current user may read himself
-        accessAllowed = true;
-      } else {
-
-        // If another user tries to read this user, then it is only possible if the both are in the same orga
-        var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
-        var userOrgaIds = itemService.getItemByUserId(id).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
-        for (long orgaId: currentUserOrgaIds) {
-          if (userOrgaIds.contains(orgaId)) {
-            try {
-              permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_USER, id);
-              accessAllowed = true;
-            } catch (Exception ex) {}
-          }
-        }
-      }
-      if (!accessAllowed) {
-        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
-      }
+      checkAccess(id);
       
       log.info("ok");
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
@@ -307,6 +287,8 @@ public class UserController {
   @PostMapping("/activate-account")
   public ResponseEntity<Object> activateAccount(final @RequestBody Map<String,String> params) {
     try {
+      // Access has here, whoever sends the activationkey
+      
       userService.activateAccount(params.get("activationKey"));
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
@@ -327,6 +309,8 @@ public class UserController {
   @PostMapping("/reset-password")
   public ResponseEntity<Object> resetPassword(final @RequestBody Map<String,String> params) {
     try {
+      // Access has here, whoever sends the activationkey
+      
       String tempPassword = userService.resetPassword(params.get("activationKey"));
       return new ResponseEntity<>(tempPassword, HttpStatus.OK);
     } catch (CollaborationException e) {
@@ -345,15 +329,16 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PostMapping("/change-password")
-  public ResponseEntity<Object> changePassword(final @RequestBody UserDTO user) {
+  public ResponseEntity<Object> changePassword(final @RequestBody UserDTO userDTO) {
     try {
-      if (!user.getUsername().equals("entable")) { // what for that?
-        userService.changePassword(user);
-        log.info("ok");
-        return ResponseEntity.noContent().build();
-      } else {
-        throw new CollaborationException(CollaborationException.CollaborationExceptionReason.PW_NOT_CHANGEABLE);
+      // Check access. Only the user himself is allowed to update himself
+      if (userService.getCurrentUserId() != userDTO.getId()) {
+        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
       }
+      
+      userService.changePassword(userDTO);
+      log.info("ok");
+      return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -372,6 +357,11 @@ public class UserController {
   @PostMapping("/leave-organization")
   public ResponseEntity<Object> leaveOrganization(final @RequestBody UserDTO userDTO) {
     try {
+      // Check access. Only the user himself is allowed to update himself
+      if (userService.getCurrentUserId() != userDTO.getId()) {
+        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
+      }
+      
       userService.leaveOrganization(userDTO);
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
@@ -392,6 +382,11 @@ public class UserController {
   @PostMapping("/join-organization")
   public ResponseEntity<Object> joinOrganization(final @RequestBody UserDTO userDTO) {
     try {
+      // Check access. Only the user himself is allowed to update himself
+      if (userService.getCurrentUserId() != userDTO.getId()) {
+        throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
+      }
+      
       userService.joinOrganization(userDTO);
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
@@ -403,7 +398,7 @@ public class UserController {
     }
   }
 
-  @Operation(summary = "Retrieve all role for given user")
+  @Operation(summary = "Retrieve all roles for given user")
   @ApiResponses(value = {
     @ApiResponse(responseCode = "200", description = "ok", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
     @ApiResponse(responseCode = "400", description = "failed", content = @Content(mediaType = "application/json", schema = @Schema(type = "string"))),
@@ -412,7 +407,10 @@ public class UserController {
   @GetMapping("/{id}/roles")
   public ResponseEntity<Object> retrieveUserRoles(final @PathVariable("id") long id) {
     try {
+      checkAccess(id);
+
       List<String> userRoles = userRoleOrchestrator.getUserRoles(id).stream().map(RoleDTO::getRolename).toList();
+
       return new ResponseEntity<>(userRoles, HttpStatus.OK);
     } catch (CollaborationException e) {
       log.error(e.getMessage());
@@ -420,6 +418,32 @@ public class UserController {
     } catch (Exception e) {
       log.error(e.getMessage());
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
+  private void checkAccess(final long userId) throws CollaborationException {
+    // Check access
+    var accessAllowed = false;
+    if (userService.getCurrentUserId() == userId) {
+      
+      // The current user may read himself
+      accessAllowed = true;
+    } else {
+  
+      // If another user tries to read this user, then it is only possible if the both are in the same orga
+      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+      var userOrgaIds = itemService.getItemByUserId(userId).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+      for (long orgaId: currentUserOrgaIds) {
+        if (userOrgaIds.contains(orgaId)) {
+          try {
+            permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_USER, userId);
+            accessAllowed = true;
+          } catch (Exception ex) {}
+        }
+      }
+    }
+    if (!accessAllowed) {
+      throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
     }
   }
 }
