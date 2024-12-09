@@ -16,21 +16,21 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.model.PermissionDTO;
 import com.collaboration.model.RoleDTO;
+import com.collaboration.service.ItemService;
 import com.collaboration.service.PermissionService;
 import com.collaboration.service.RoleService;
-import com.collaboration.service.UserRoleOrchestrator;
 import com.collaboration.service.UserService;
 
 @Service
 public class PermissionEvaluator {
 
-  private final UserRoleOrchestrator userRoleOrchestrator;
+  private final ItemService itemService;
   private final UserService userService;
   private final RoleService roleService;
   private final PermissionService permissionService;
 
-  public PermissionEvaluator(final UserRoleOrchestrator userRoleOrchestrator, final UserService userService, final RoleService roleService, final PermissionService permissionService) {
-    this.userRoleOrchestrator = userRoleOrchestrator;
+  public PermissionEvaluator(final ItemService itemService, final UserService userService, final RoleService roleService, final PermissionService permissionService) {
+    this.itemService = itemService;
     this.userService = userService;
     this.roleService = roleService;
     this.permissionService = permissionService;
@@ -111,7 +111,7 @@ public class PermissionEvaluator {
     // var authentication = SecurityContextHolder.getContext().getAuthentication();
     // var roles = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).map(r->r.replace("ROLE_", "")).toList();
     // Get roles not from authorities, but form item2role
-    var userRoleIds = userRoleOrchestrator.getUserRoles(userId).stream().map(RoleDTO::getId).toList();
+    var userRoleIds = itemService.getItemByUserId(userId, List.of(ItemService.SubItems.ROLES)).getRoleDTOs().stream().map(RoleDTO::getId).toList();
     
     // Admin has all rights, so only return this, not filtered by any orgaId
     if (userRoleIds.contains(AppConfig.ROLEID_YARE_ADMIN)) {

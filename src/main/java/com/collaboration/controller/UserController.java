@@ -28,11 +28,10 @@ import com.collaboration.config.AppConfig;
 import com.collaboration.config.CollaborationException;
 import com.collaboration.config.CollaborationException.CollaborationExceptionReason;
 import com.collaboration.config.EmailServiceImpl;
-import com.collaboration.model.Item2OrgaDTO;
+import com.collaboration.model.OrganizationDTO;
 import com.collaboration.model.RoleDTO;
 import com.collaboration.model.UserDTO;
 import com.collaboration.service.ItemService;
-import com.collaboration.service.UserRoleOrchestrator;
 import com.collaboration.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,15 +53,13 @@ public class UserController {
   private final UserService userService;
   private final ItemService itemService;
   private final EmailServiceImpl emailService;
-  private final UserRoleOrchestrator userRoleOrchestrator;
   private final PermissionEvaluator permissionEvaluator;
 
-  public UserController(final UserService userService, final ItemService itemService, final EmailServiceImpl emailService, 
-      final UserRoleOrchestrator userRoleOrchestrator, final PermissionEvaluator permissionEvaluator) {
+  public UserController(final UserService userService, final ItemService itemService, 
+      final EmailServiceImpl emailService, final PermissionEvaluator permissionEvaluator) {
     this.userService = userService;
     this.itemService = itemService;
     this.emailService = emailService;
-    this.userRoleOrchestrator = userRoleOrchestrator;
     this.permissionEvaluator = permissionEvaluator;
 }
 
@@ -205,12 +202,12 @@ public class UserController {
       List<UserDTO> userDTOs = userService.getAllUser();
 
       // Check access for each found itemtypes
-      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId(), List.of(ItemService.SubItems.ORGANIZATIONS)).getOrganizationDTOs().stream().map(OrganizationDTO::getId).toList();
       var usersAllowed = new ArrayList<UserDTO>();
       for ( UserDTO userDTO: userDTOs) {
         try {
           var accessAllowed = false;
-          var userOrgaIds = itemService.getItemByUserId(userDTO.getId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+          var userOrgaIds = itemService.getItemByUserId(userDTO.getId(), List.of(ItemService.SubItems.ORGANIZATIONS)).getOrganizationDTOs().stream().map(OrganizationDTO::getId).toList();
           for (long orgaId: currentUserOrgaIds) {
             if (userOrgaIds.contains(orgaId)) {
               try {
@@ -409,7 +406,7 @@ public class UserController {
     try {
       checkAccess(id);
 
-      List<String> userRoles = userRoleOrchestrator.getUserRoles(id).stream().map(RoleDTO::getRolename).toList();
+      var userRoles = itemService.getItemByUserId(id, List.of(ItemService.SubItems.ROLES)).getRoleDTOs().stream().map(RoleDTO::getRolename).toList();
 
       return new ResponseEntity<>(userRoles, HttpStatus.OK);
     } catch (CollaborationException e) {
@@ -431,8 +428,8 @@ public class UserController {
     } else {
   
       // If another user tries to read this user, then it is only possible if the both are in the same orga
-      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId()).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
-      var userOrgaIds = itemService.getItemByUserId(userId).getItem2Orgas().stream().map(Item2OrgaDTO::getOrgaId).toList();
+      var currentUserOrgaIds = itemService.getItemByUserId(userService.getCurrentUserId(), List.of(ItemService.SubItems.ORGANIZATIONS)).getOrganizationDTOs().stream().map(OrganizationDTO::getId).toList();
+      var userOrgaIds = itemService.getItemByUserId(userId, List.of(ItemService.SubItems.ORGANIZATIONS)).getOrganizationDTOs().stream().map(OrganizationDTO::getId).toList();
       for (long orgaId: currentUserOrgaIds) {
         if (userOrgaIds.contains(orgaId)) {
           try {

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.collaboration.config.CollaborationException;
-import com.collaboration.model.Item2OrgaDTO;
 import com.collaboration.model.ItemDTO;
 import com.collaboration.model.Nonuser;
 import com.collaboration.model.NonuserDTO;
@@ -33,10 +32,13 @@ public class NonuserService {
   private final NonuserRepository nonuserRepository;
   private final ItemService itemService;
   private final UserService userService;
+  private final OrganizationService organizationService;
 
-  public NonuserService(final NonuserRepository nonuserRepository, final ItemService itemService, final UserService userService) {
+  public NonuserService(final NonuserRepository nonuserRepository, final ItemService itemService, 
+      final UserService userService, final OrganizationService organizationService) {
     this.nonuserRepository = nonuserRepository;
     this.itemService = itemService;
+    this.organizationService = organizationService;
     this.userService = userService;
   }
 
@@ -48,8 +50,10 @@ public class NonuserService {
 
     // Also all non-users are items automatically
     ItemDTO item = new ItemDTO(0, nonuserDTO.getItemtypeId(), nonuser.getId());
-    Item2OrgaDTO item2orga = new Item2OrgaDTO(0L, item.getId(), nonuserDTO.getOrgaId());
-    item.setItem2Orgas(List.of(item2orga));
+    if (nonuserDTO.getOrgaId() != 0) {
+      var orga = organizationService.getOrganizationById(nonuserDTO.getOrgaId());
+      item.setOrganizationDTOs(List.of(orga));
+    }
     item = itemService.createItem(item);
 
     return convertToDTO(nonuser);
@@ -69,7 +73,7 @@ public class NonuserService {
     nonuserRepository.save(nonuser);
     
     // Also update the itemtype
-    ItemDTO item = itemService.getItemByNonuserId(nonuser.getId());
+    ItemDTO item = itemService.getItemByNonuserId(nonuser.getId(), List.of());
     item.setItId(nonuserDTO.getItemtypeId());
     itemService.updateItem(item);
 
@@ -127,7 +131,7 @@ public class NonuserService {
 
     // Get the item for the nonuser in order to set the itemtype in the DTO
     try {
-      var item = itemService.getItemByNonuserId(nonuser.getId());
+      var item = itemService.getItemByNonuserId(nonuser.getId(), List.of());
       nonuserDTO.setItemtypeId(item.getItId());
     } catch (CollaborationException e) {
       log.error("Item for nonuserId={} was not found, should not happen!", nonuser.getId(), e);

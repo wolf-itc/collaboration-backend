@@ -7,6 +7,8 @@
  * ***************************************************************************/
 package com.collaboration.model;
 
+import java.util.Optional;
+
 import lombok.Data;
 
 @Data
@@ -14,6 +16,8 @@ public class Item2OrgaDTO {
     private long id;
     private long itemId;
     private long orgaId;
+    Optional<ItemDTO> itemDTO;
+    Optional<OrganizationDTO> organizationDTO;
     
     public Item2OrgaDTO() {
     }

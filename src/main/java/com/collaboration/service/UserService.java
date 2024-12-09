@@ -24,9 +24,7 @@ import com.collaboration.config.CollaborationException;
 import com.collaboration.model.Authority;
 import com.collaboration.model.AuthorityRepository;
 import com.collaboration.model.Item2Orga;
-import com.collaboration.model.Item2OrgaDTO;
 import com.collaboration.model.Item2OrgaRepository;
-import com.collaboration.model.Item2RoleDTO;
 import com.collaboration.model.ItemDTO;
 import com.collaboration.model.User;
 import com.collaboration.model.UserDTO;
@@ -45,13 +43,16 @@ public class UserService {
   private final RoleService roleService;
   private final Item2OrgaRepository item2OrgaRepository;
   private final PasswordEncoder passwordEncoder;
+  private final OrganizationService organizationService;
 
   public UserService(final UserRepository userRepository, final AuthorityRepository authorityRepository, final ItemService itemService, 
-      final RoleService roleService, final Item2OrgaRepository item2OrgaRepository, final PasswordEncoder passwordEncoder) {
+      final RoleService roleService, final OrganizationService organizationService,
+      final Item2OrgaRepository item2OrgaRepository, final PasswordEncoder passwordEncoder) {
     this.userRepository = userRepository;
     this.authorityRepository = authorityRepository;
     this.itemService = itemService;
     this.roleService = roleService;
+    this.organizationService= organizationService;
     this.item2OrgaRepository = item2OrgaRepository;
     this.passwordEncoder = passwordEncoder;
   }
@@ -79,19 +80,17 @@ public class UserService {
     Authority authority = new Authority(user.getId(), user.getUsername(), "ROLE_USER");
     authorityRepository.save(authority);
 
-    // Retrieve the 'USER'-role for current organization
-    final var roleUser = roleService.getRoleByRolenameAndOrgaId("USER", userDTO.getOrgaId());
-    
     // Also all users are items automatically
     ItemDTO item = new ItemDTO(0, AppConfig.ITEMTYPE_USER, user.getId());
     if (userDTO.getOrgaId() != 0) {
-      Item2OrgaDTO item2orga = new Item2OrgaDTO(0L, item.getId(), userDTO.getOrgaId());
-      item.setItem2Orgas(List.of(item2orga));
+      var orga = organizationService.getOrganizationById(userDTO.getOrgaId());
+      item.setOrganizationDTOs(List.of(orga));
     }
     // Entry in table 'Authority' is only used for basic login, all other things go via the item2role
     // So give role USER here, too
-    Item2RoleDTO item2role = new Item2RoleDTO(0L, item.getId(), roleUser.getId());
-    item.setItem2Roles(List.of(item2role));
+    // Retrieve the 'USER'-role for current organization
+    final var roleUser = roleService.getRoleByRolenameAndOrgaId("USER", userDTO.getOrgaId());
+    item.setRoleDTOs(List.of(roleUser));
     
     item = itemService.createItem(item);
 

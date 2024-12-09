@@ -18,8 +18,8 @@ public class ItemDTO {
   private long id;
   private long itId;
   private long userOrNonuserId;
-  private List<Item2OrgaDTO> item2Orgas = new ArrayList<>();
-  private List<Item2RoleDTO> item2Roles = new ArrayList<>();
+  private List<OrganizationDTO> organizationDTOs = new ArrayList<>();
+  private List<RoleDTO> roleDTOs = new ArrayList<>();
 
   public ItemDTO() {
   }
