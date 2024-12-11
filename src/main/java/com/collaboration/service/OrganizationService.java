@@ -43,6 +43,8 @@ public class OrganizationService {
     roleService.createRole(roleDTO);
     roleDTO = new RoleDTO(0L, organization.getId(), "ADMIN");
     roleService.createRole(roleDTO);
+    roleDTO = new RoleDTO(0L, organization.getId(), "GUEST");
+    roleService.createRole(roleDTO);
 
     return convertToDTO(organization);
   }

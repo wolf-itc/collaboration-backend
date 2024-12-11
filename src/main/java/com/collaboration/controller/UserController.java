@@ -76,6 +76,10 @@ public class UserController {
   @PostMapping
   public ResponseEntity<Object> createUser(@RequestBody UserDTO userDTO) {
     try {
+      // Ensure that organization-id is given
+      if (userDTO.getOrgaId() == 0) {
+        throw new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_VALUE);
+      }
       // Check access
       permissionEvaluator.mayCreate(userDTO.getOrgaId(), AppConfig.ITEMTYPE_USER);
 

@@ -6,7 +6,7 @@ Doku
 frontend
 letsencrypt
 pics_design
-src/main/resources
+src/main/resources/letsencrypt
 target
 .classpath
 .project

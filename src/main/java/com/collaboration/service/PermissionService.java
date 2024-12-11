@@ -61,11 +61,11 @@ public class PermissionService {
       return permissionRepository.findByOrgaId(orgaid).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
     }
 
-    public List<PermissionDTO> getByAndItemtypeidAndItemidAndRoleidIn(final long itemtypeId, final long itemId, final List<Long> roleIds) {
+    public List<PermissionDTO> getByItemtypeIdAndItemIdAndRoleIdsIn(final long itemtypeId, final long itemId, final List<Long> roleIds) {
       return permissionRepository.findByItemtypeIdAndItemIdAndRoleIdIn(itemtypeId, itemId, roleIds).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
     }
     
-    public List<PermissionDTO> getByAndItemtypeidAndRoleidIn(final long itemtypeId, final List<Long> roleIds) {
+    public List<PermissionDTO> getByItemtypeIdAndRoleIdsIn(final long itemtypeId, final List<Long> roleIds) {
       return permissionRepository.findByItemtypeIdAndRoleIdIn(itemtypeId, roleIds).stream().map( i -> convertToDTO(i)).collect(Collectors.toList());
     }
 
