@@ -29,6 +29,14 @@ public class EmailServiceImpl {
     this.mailSender = mailSender;
   }
 
+  public JavaMailSender getMailSender() {
+    return mailSender;
+  }
+
+  public String getAdminEMail() {
+    return adminEMail;
+  }
+
   public void sendSimpleMessage( String to, String subject, String text) {
     log.trace("> sendSimpleMessage to={} subject={} text={}", to, subject, text);
     

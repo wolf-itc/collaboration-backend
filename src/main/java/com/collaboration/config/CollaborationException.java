@@ -52,7 +52,7 @@ public class CollaborationException extends Exception {
   @Override
   public String getMessage() {
     return "{ \"ExceptionType\":\"CollaborationException\", " +
-         "\"ExceptionReason\":\""+ exceptionReason.toString()+ "\"," +
+         "\"ExceptionReason\":\""+ exceptionReason.toString()+ "\", " +
          "\"ExceptionCode\":\""+ exceptionReason.getExceptionCode()+ "\"}";
   }
 }
