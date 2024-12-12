@@ -19,6 +19,9 @@ import com.collaboration.model.Role;
 import com.collaboration.model.RoleDTO;
 import com.collaboration.model.RoleRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class RoleService {
 
@@ -31,30 +34,40 @@ public class RoleService {
   }
 
   public RoleDTO createRole(final RoleDTO roleDTO) throws CollaborationException {
+    log.trace("> createRole");
+
     // Check role only contains valid characters
     Helpers.ensureAlphabetic(roleDTO.getRolename());
     
     Role role = convertFromDTO(roleDTO);
     roleRepository.save(role);
     
+    log.trace("< createRole");
     return convertToDTO(role);
   }
 
   public RoleDTO updateRole(final RoleDTO roleDTO) throws CollaborationException {
+    log.trace("> updateRole");
+
     // Check if exists
     roleRepository.findById(roleDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
     // Check role only contains valid characters
     Helpers.ensureAlphabetic(roleDTO.getRolename());
     
+    log.trace("< updateRole");
     return convertToDTO(roleRepository.save(convertFromDTO(roleDTO)));
   }
 
   public void deleteRole(final long id) throws CollaborationException {
+    log.trace("> deleteRole");
+
     // Check if exists
     roleRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
     
     roleRepository.deleteById(id);
+
+    log.trace("< deleteRole");
   }
 
   public List<RoleDTO> getAllRoles() {

@@ -62,6 +62,8 @@ public class ItemService {
 
   @Transactional
   public ItemDTO createItem(final ItemDTO itemDTO) throws CollaborationException {
+    log.trace("> createItem");
+
     final Item item = convertFromDTO(itemDTO);
     itemRepository.save(item);
 
@@ -77,11 +79,14 @@ public class ItemService {
       item2RoleRepository.save(item2role);
     });
 
+    log.trace("< createItem");
     return convertToDTO(item, List.of());
   }
 
   @Transactional
   public ItemDTO updateItem(final ItemDTO itemDTO) throws CollaborationException {
+    log.trace("> updateItem");
+
     // Check if exists
     itemRepository.findById(itemDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
@@ -99,16 +104,21 @@ public class ItemService {
       item2RoleRepository.save(item2role);
     });
 
+    log.trace("< updateItem");
     return convertToDTO(item, List.of());
   }
 
   @Transactional
   public List<ItemDTO> getAllItems(final List<SubItems> subItems) throws CollaborationException {
+    log.trace("> getAllItems");
+
     var items = itemRepository.findAll();
     var itemDTOs = new ArrayList<ItemDTO>();
     for (Item item: items) {
       itemDTOs.add(convertToDTO(item, subItems));
     }
+ 
+    log.trace("< getAllItems");
     return itemDTOs;
   }
 
@@ -120,18 +130,26 @@ public class ItemService {
 
   @Transactional
   public ItemDTO getItemByUserId(final long userId, final List<SubItems> subItems) throws CollaborationException {
+    log.trace("> getItemByUserId");
+
     final Item item = itemRepository.findByItIdAndUserOrNonuserId(AppConfig.ITEMTYPE_USER, userId).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
+
+    log.trace("< getItemByUserId");
     return convertToDTO(item, subItems);
   }
 
   @Transactional
   public ItemDTO getItemByNonuserId(final long userId, final List<SubItems> subItems) throws CollaborationException {
+    log.trace("> ");
+
     final Item item = itemRepository.findByItIdNotAndUserOrNonuserId(AppConfig.ITEMTYPE_USER, userId).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
     return convertToDTO(item, subItems);
   }
 
   @Transactional
   public int deleteItemByUserId(final long userId) throws CollaborationException {
+    log.trace("> deleteItemByUserId");
+
     final var item = getItemByUserId(userId, List.of());
 
     var n = item2OrgaRepository.deleteAllByItemId(item.getId());
@@ -144,11 +162,14 @@ public class ItemService {
     entityManager.flush();
     entityManager.clear();
 
+    log.trace("< deleteItemByUserId");
     return itemRepository.deleteByItIdAndUserOrNonuserId(AppConfig.ITEMTYPE_USER, userId);
   }
 
   @Transactional
   public int deleteItemByNonuserId(final long userId) throws CollaborationException {
+    log.trace("> deleteItemByNonuserId");
+
     final var item = getItemByNonuserId(userId, List.of());
 
     var n = item2OrgaRepository.deleteAllByItemId(item.getId());
@@ -161,6 +182,7 @@ public class ItemService {
     entityManager.flush();
     entityManager.clear();
 
+    log.trace("< deleteItemByNonuserId");
     return itemRepository.deleteByItIdNotAndUserOrNonuserId(AppConfig.ITEMTYPE_USER, userId);
   }
 
@@ -169,6 +191,8 @@ public class ItemService {
   }
 
   private ItemDTO convertToDTO(final Item item, final List<SubItems> subItems) throws CollaborationException {
+    log.trace("> convertToDTO");
+
     var itemDTO = modelMapper.map(item, ItemDTO.class);
     if (subItems.contains(SubItems.ROLES)) {
       var roleDTOs = new ArrayList<RoleDTO>();
@@ -186,6 +210,8 @@ public class ItemService {
       }
       itemDTO.setOrganizationDTOs(orgaDTOs);
     }
+
+    log.trace("< convertToDTO");
     return itemDTO;
   }
 

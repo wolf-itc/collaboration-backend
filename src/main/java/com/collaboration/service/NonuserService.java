@@ -45,6 +45,8 @@ public class NonuserService {
   // Create a new Nonuser
   @Transactional
   public NonuserDTO createNonuser(final NonuserDTO nonuserDTO) throws CollaborationException {
+    log.trace("> createNonuser");
+
     Nonuser nonuser = convertFromDTO(nonuserDTO);
     nonuserRepository.save(nonuser);
 
@@ -56,12 +58,15 @@ public class NonuserService {
     }
     item = itemService.createItem(item);
 
+    log.trace("< createNonuser");
     return convertToDTO(nonuser);
   }
 
   // Update an existing Nonuser
   @Transactional
   public NonuserDTO updateNonuser(final NonuserDTO nonuserDTO) throws CollaborationException {
+    log.trace("> updateNonuser");
+
     Optional<Nonuser> existingNonuser = nonuserRepository.findById(nonuserDTO.getId());
     if (existingNonuser.isEmpty()) {
       throw new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND);
@@ -77,12 +82,15 @@ public class NonuserService {
     item.setItId(nonuserDTO.getItemtypeId());
     itemService.updateItem(item);
 
+    log.trace("< updateNonuser");
     return convertToDTO(nonuser);
   }
 
   // Delete a Nonuser by Id
   @Transactional
   public void deleteNonuser(final long id) throws CollaborationException {
+    log.trace("> deleteNonuser");
+
     nonuserRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
     // First delete the item
@@ -90,13 +98,18 @@ public class NonuserService {
 
     // Then the non-user itself
     nonuserRepository.deleteById(id);
+
+    log.trace("< deleteNonuser");
   }
 
   // Get a Nonuser by Id
   @Transactional
   public NonuserDTO getNonuserById(final long id) throws CollaborationException {
+    log.trace("> getNonuserById");
+
     Nonuser nonuser = nonuserRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
+    log.trace("< getNonuserById");
     return convertToDTO(nonuser);
   }
 
@@ -127,6 +140,8 @@ public class NonuserService {
 
   // Convert from Nonuser entity to DTO
   private NonuserDTO convertToDTO(final Nonuser nonuser) {
+    log.trace("> convertToDTO");
+
     var nonuserDTO = modelMapper.map(nonuser, NonuserDTO.class);
 
     // Get the item for the nonuser in order to set the itemtype in the DTO
@@ -137,13 +152,18 @@ public class NonuserService {
       log.error("Item for nonuserId={} was not found, should not happen!", nonuser.getId(), e);
     }
     
+    log.trace("< convertToDTO");
     return nonuserDTO;
   }
 
   // Convert from DTO to Nonuser entity
   private Nonuser convertFromDTO(final NonuserDTO nonuserDTO) throws CollaborationException {
+    log.trace("> convertFromDTO");
+
     var nonuser = modelMapper.map(nonuserDTO, Nonuser.class);
     nonuser.setUserId(userService.getCurrentUserId());
+
+    log.trace("< convertFromDTO");
     return nonuser;
   }
 }

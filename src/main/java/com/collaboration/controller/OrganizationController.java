@@ -57,12 +57,14 @@ public class OrganizationController {
   })
   @PostMapping
   public ResponseEntity<Object> createOrganization(@RequestBody OrganizationDTO organizationDTO) {
+    log.trace("> createOrganization: organizationDTO={}", organizationDTO);
+
     try {
       organizationDTO = organizationService.createOrganization(organizationDTO);
-      log.info( "ok" );
+      log.trace("< createOrganization: ok");
       return new ResponseEntity<>(organizationDTO, HttpStatus.OK );
     } catch (Exception e) {
-      log.error( e.getMessage());
+      log.error("< createOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR );
     }
   }
@@ -76,16 +78,18 @@ public class OrganizationController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateOrganization(final @PathVariable long id, @RequestBody OrganizationDTO organizationDTO) {
+    log.trace("> updateOrganization: id={} organizationDTO={}", id, organizationDTO);
+
     try {
       organizationDTO.setId(id);
       organizationDTO = organizationService.updateOrganization(organizationDTO);
-      log.info( "ok" );
+      log.trace("< updateOrganization: ok");
       return new ResponseEntity<>( organizationDTO, HttpStatus.OK );
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error( e.getMessage());
+      log.error("< updateOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>( e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR );
     }
   }
@@ -99,15 +103,17 @@ public class OrganizationController {
   })
   @DeleteMapping("/deleteOrganization/{id}")
   public ResponseEntity<Object> deleteOrganization(final @PathVariable int id) {
+    log.trace("> deleteOrganization: id={}", id);
+
     try {
       organizationService.deleteOrganization(id);
-      log.info( "ok" );
+      log.trace("< deleteOrganization: ok");
       return new ResponseEntity<>(String.format("Organization id=%d deleted successfully", id), HttpStatus.OK );
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error( e.getMessage());
+      log.error("< deleteOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>( e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR );
     }
   }
@@ -121,15 +127,17 @@ public class OrganizationController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveOrganization(final @PathVariable int id) {
+    log.trace("> retrieveOrganization: id={}", id);
+
     try {
       OrganizationDTO organization = organizationService.getOrganizationById(id);
-      log.info( "ok" );
+      log.trace("< retrieveOrganization: ok");
       return new ResponseEntity<>(organization, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error( e.getMessage());
+      log.error("< retrieveOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>( e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR );
     }
   }
@@ -142,12 +150,14 @@ public class OrganizationController {
   })
   @GetMapping
   public ResponseEntity<Object> retrieveAllOrganizations() {
+    log.trace("> retrieveAllOrganizations");
+
     try {
       List<OrganizationDTO> listOrganizations = organizationService.getAllOrganizations();
-      log.info("ok");
+      log.trace("< retrieveAllOrganizations: ok");
       return new ResponseEntity<>(listOrganizations, HttpStatus.OK);
     } catch (Exception e) {
-      log.error( e.getMessage());
+      log.error("< retrieveAllOrganizations: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

@@ -62,23 +62,25 @@ public class RoleController {
   })
   @PostMapping
   public ResponseEntity<Object> createRole(@RequestBody RoleDTO roleDTO) {
+    log.trace("> createRole: roleDTO={}", roleDTO);
+
     try {
       // Check access
       permissionEvaluator.mayCreate(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE);
       
       roleDTO.setId(0);
       roleDTO = roleService.createRole(roleDTO);
-      log.info("Role created successfully");
+      log.trace("< createRole: Role created successfully");
 
       return new ResponseEntity<>(roleDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createRole: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createRole: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -93,23 +95,25 @@ public class RoleController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateRole(final @PathVariable long id, @RequestBody RoleDTO roleDTO) {
+    log.trace("> updateRole: id={} roleDTO={}", id, roleDTO);
+
     try {
       // Check access
       permissionEvaluator.mayUpdate(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
       
       roleDTO.setId(id);
       roleDTO = roleService.updateRole(roleDTO);
-      log.info("Role updated successfully");
+      log.trace("< updateRole: Role updated successfully");
       
       return new ResponseEntity<>(roleDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateRole: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updateRole: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -124,23 +128,25 @@ public class RoleController {
   })
   @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteRole(final @PathVariable long id) {
+    log.trace("> deleteRole: id={}", id);
+
     try {
       // Check access
       RoleDTO roleDTO = roleService.getRoleById(id);
       permissionEvaluator.mayDelete(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
 
       roleService.deleteRole(id);
-      log.info("Role deleted successfully");
+      log.trace("< deleteRole: Role deleted successfully");
 
       return new ResponseEntity<>(String.format("Role id=%d deleted successfully", id), HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteRole: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deleteRole: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -155,22 +161,24 @@ public class RoleController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveRole(final @PathVariable long id) {
+    log.trace("> retrieveRole: id={}", id);
+
     try {
       RoleDTO roleDTO = roleService.getRoleById(id);
       
       // Check access
       permissionEvaluator.mayRead(roleDTO.getOrgaId(), AppConfig.ITEMTYPE_ROLE, id);
-      log.info("Role retrieved successfully");
+      log.trace("< retrieveRole: Role retrieved successfully");
       
       return new ResponseEntity<>(roleDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveRole: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveRole: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -185,22 +193,24 @@ public class RoleController {
   })
   @GetMapping("/by-orgaid/{orgaid}")
   public ResponseEntity<Object> retrieveRolesByOrgaId(final @PathVariable long orgaid) {
+    log.trace("> retrieveRolesByOrgaId: orgaid={}", orgaid);
+
     try {
       // Check access
       permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_ROLE, null);
       
       List<RoleDTO> roles = roleService.getAllRolesByOrgaId(orgaid);
-      log.info("Roles retrieved for orgaId: {}", orgaid);
+      log.trace("< retrieveRolesByOrgaId: Roles retrieved for orgaId: {}", orgaid);
 
       return new ResponseEntity<>(roles, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveRolesByOrgaId: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveRolesByOrgaId: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

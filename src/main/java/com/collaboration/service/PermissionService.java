@@ -18,6 +18,9 @@ import com.collaboration.model.Permission;
 import com.collaboration.model.PermissionDTO;
 import com.collaboration.model.PermissionRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class PermissionService {
 
@@ -30,22 +33,33 @@ public class PermissionService {
     }
 
     public PermissionDTO createPermission(final PermissionDTO permissionDTO) throws CollaborationException {
+      log.trace("> createPermission");
+
       Permission permission = convertFromDTO(permissionDTO);
+
+      log.trace("< createPermission");
       return convertToDTO(permissionRepository.save(permission));
     }
 
     public PermissionDTO updatePermission(final PermissionDTO permissionDTO) throws CollaborationException {
+      log.trace("> updatePermission");
+
       // Check if exists
       permissionRepository.findById(permissionDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
       
+      log.trace("< updatePermission");
       return convertToDTO(permissionRepository.save(convertFromDTO(permissionDTO)));
     }
 
     public void deletePermission(final long id) throws CollaborationException {
+      log.trace("> deletePermission");
+
       // Check if exists
       permissionRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
       permissionRepository.deleteById(id);
+
+      log.trace("< deletePermission");
     }
 
     public List<PermissionDTO> getAllPermissions() {

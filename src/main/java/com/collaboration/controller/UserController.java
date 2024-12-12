@@ -75,6 +75,8 @@ public class UserController {
   })
   @PostMapping
   public ResponseEntity<Object> createUser(@RequestBody UserDTO userDTO) {
+    log.trace("> createUser: userDTO={}", userDTO);
+
     try {
       // Ensure that organization-id is given
       if (userDTO.getOrgaId() == 0) {
@@ -92,16 +94,16 @@ public class UserController {
         log.error(msg);
         return new ResponseEntity<>(msg, HttpStatus.BAD_REQUEST);
       }
-      log.info("ok");
+      log.trace("< createUser: ok");
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createUser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createUser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -115,6 +117,8 @@ public class UserController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateUser(final @PathVariable long id, @RequestBody UserDTO userDTO) {
+    log.trace("> updateUser: userDTO={}", userDTO);
+
     try {
       // Check access. Only the user himself is allowed to update himself
       if (userService.getCurrentUserId() != id) {
@@ -125,16 +129,16 @@ public class UserController {
         userDTO.setId(id);
       }
       userDTO = userService.updateUser(userDTO);
-      log.info("ok");
+      log.trace("< updateUser: ok");
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateUser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updateUser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -148,20 +152,22 @@ public class UserController {
   })
   @DeleteMapping("/{activationkey}")
   public ResponseEntity<Object> deleteAccount(final @PathVariable("activationkey") String activationKey) {
+    log.trace("> deleteAccount: activationKey={}", activationKey);
+
     try {
       // Access has here, whoever sends the activationkey
       
       UserDTO userDTO = userService.deleteAccount(activationKey);
-      log.info("ok");
+      log.trace("< deleteAccount: ok");
       return new ResponseEntity<>(String.format("User name=%s deleted successfully", userDTO.getUsername()), HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteAccount: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deleteAccount: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -175,21 +181,23 @@ public class UserController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveUser(final @PathVariable("id") long id) {
+    log.trace("> retrieveUser: id={}", id);
+
     try {
       UserDTO userDTO = userService.getUserById(id);
 
       checkAccess(id);
       
-      log.info("ok");
+      log.trace("< retrieveUser: ok");
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveUser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveUser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -202,6 +210,8 @@ public class UserController {
   })
   @GetMapping
   public ResponseEntity<Object> retrieveAllUsers() {
+    log.trace("> retrieveAllUsers");
+
     try {
       List<UserDTO> userDTOs = userService.getAllUser();
 
@@ -228,10 +238,10 @@ public class UserController {
         }
       }
       
-      log.info("Users retrieved successfully");
+      log.trace("< retrieveAllUsers: ok");
       return new ResponseEntity<>(usersAllowed, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllUsers: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -243,16 +253,18 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PostMapping("/login")
-  public ResponseEntity<Object> doLogin(final @RequestBody UserDTO user) {
+  public ResponseEntity<Object> doLogin(@RequestBody UserDTO userDTO) {
+    log.trace("> doLogin: userDTO={}", userDTO);
+
     try {
-      UserDTO userDTO = userService.doLogin(user);
-      log.info("ok");
+      userDTO = userService.doLogin(userDTO);
+      log.trace("< doLogin: ok");
       return new ResponseEntity<>(userDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< doLogin: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< doLogin: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -264,17 +276,19 @@ public class UserController {
     @ApiResponse(responseCode = "500", description = "Internal Server Error", content = @Content(mediaType = "application/json", schema = @Schema(type = "string")))
   })
   @PostMapping("/prepare-password-reset")
-  public ResponseEntity<Object> preparePasswordReset(final @RequestBody UserDTO user) {
+  public ResponseEntity<Object> preparePasswordReset(final @RequestBody UserDTO userDTO) {
+    log.trace("> preparePasswordReset: userDTO={}", userDTO);
+
     try {
-      userService.preparePasswordReset(user);
-      emailService.sendSimpleMessage(user.getEmail(), user.getMailSubject(), user.getMailBody());
-      log.info("ok");
+      userService.preparePasswordReset(userDTO);
+      emailService.sendSimpleMessage(userDTO.getEmail(), userDTO.getMailSubject(), userDTO.getMailBody());
+      log.trace("< preparePasswordReset: ok");
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< preparePasswordReset: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< preparePasswordReset: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -287,16 +301,19 @@ public class UserController {
   })
   @PostMapping("/activate-account")
   public ResponseEntity<Object> activateAccount(final @RequestBody Map<String,String> params) {
+    log.trace("> activateAccount: params={}", params);
+
     try {
       // Access has here, whoever sends the activationkey
       
       userService.activateAccount(params.get("activationKey"));
+      log.trace("< activateAccount: ok");
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< activateAccount: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< activateAccount: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -309,16 +326,19 @@ public class UserController {
   })
   @PostMapping("/reset-password")
   public ResponseEntity<Object> resetPassword(final @RequestBody Map<String,String> params) {
+    log.trace("> resetPassword: params={}", params);
+
     try {
       // Access has here, whoever sends the activationkey
       
       String tempPassword = userService.resetPassword(params.get("activationKey"));
+      log.trace("< resetPassword: ok");
       return new ResponseEntity<>(tempPassword, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< resetPassword: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< resetPassword: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -331,6 +351,8 @@ public class UserController {
   })
   @PostMapping("/change-password")
   public ResponseEntity<Object> changePassword(final @RequestBody UserDTO userDTO) {
+    log.trace("> changePassword: userDTO={}", userDTO);
+
     try {
       // Check access. Only the user himself is allowed to update himself
       if (userService.getCurrentUserId() != userDTO.getId()) {
@@ -338,13 +360,13 @@ public class UserController {
       }
       
       userService.changePassword(userDTO);
-      log.info("ok");
+      log.trace("< changePassword: ok");
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< changePassword: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< changePassword: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -357,6 +379,8 @@ public class UserController {
   })
   @PostMapping("/leave-organization")
   public ResponseEntity<Object> leaveOrganization(final @RequestBody UserDTO userDTO) {
+    log.trace("> leaveOrganization: userDTO={}", userDTO);
+
     try {
       // Check access. Only the user himself is allowed to update himself
       if (userService.getCurrentUserId() != userDTO.getId()) {
@@ -364,12 +388,13 @@ public class UserController {
       }
       
       userService.leaveOrganization(userDTO);
+      log.trace("< leaveOrganization: ok");
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< leaveOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< leaveOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -382,6 +407,8 @@ public class UserController {
   })
   @PostMapping("/join-organization")
   public ResponseEntity<Object> joinOrganization(final @RequestBody UserDTO userDTO) {
+    log.trace("> joinOrganization: userDTO={}", userDTO);
+
     try {
       // Check access. Only the user himself is allowed to update himself
       if (userService.getCurrentUserId() != userDTO.getId()) {
@@ -389,12 +416,13 @@ public class UserController {
       }
       
       userService.joinOrganization(userDTO);
+      log.trace("< joinOrganization: ok");
       return ResponseEntity.noContent().build();
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< joinOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< joinOrganization: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -407,22 +435,27 @@ public class UserController {
   })
   @GetMapping("/{id}/roles")
   public ResponseEntity<Object> retrieveUserRoles(final @PathVariable("id") long id) {
+    log.trace("> retrieveUserRoles: id={}", id);
+
     try {
       checkAccess(id);
 
       var userRoles = itemService.getItemByUserId(id, List.of(ItemService.SubItems.ROLES)).getRoleDTOs().stream().map(RoleDTO::getRolename).toList();
 
+      log.trace("< retrieveUserRoles: userRoles={}", userRoles);
       return new ResponseEntity<>(userRoles, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveUserRoles: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveUserRoles: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
   
   private void checkAccess(final long userId) throws CollaborationException {
+    log.trace("> checkAccess: userId={}", userId);
+
     // Check access
     var accessAllowed = false;
     if (userService.getCurrentUserId() == userId) {
@@ -444,7 +477,10 @@ public class UserController {
       }
     }
     if (!accessAllowed) {
+      log.error("< checkAccess: accessDenied");
       throw(new CollaborationException(CollaborationException.CollaborationExceptionReason.ACCESS_DENIED));
     }
+
+    log.trace("< checkAccess: ok");
   }
 }

@@ -62,21 +62,23 @@ public class ItemtypeController {
   })
   @PostMapping
   public ResponseEntity<Object> createItemtype(@RequestBody ItemtypeDTO itemtypeDTO) {
+    log.trace("> createItemtype: itemtypeDTO={}", itemtypeDTO);
+
     try {
       // Check access
       permissionEvaluator.mayCreate(itemtypeDTO.getOrgaId(), AppConfig.ITEMTYPE_ITEMTYPE);
 
       itemtypeDTO = itemtypeService.createItemtype(itemtypeDTO);
-      log.info("itemtype created successfully");
+      log.info("< createItemtype: itemtype created successfully");
       return new ResponseEntity<>(itemtypeDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createItemtype: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createItemtype: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -90,22 +92,24 @@ public class ItemtypeController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateItemtype(final @PathVariable long id, @RequestBody ItemtypeDTO itemtypeDTO) {
+    log.trace("> updateItemtype: id={} itemtypeDTO={}", id, itemtypeDTO);
+
     try {
       // Check access
       permissionEvaluator.mayUpdate(itemtypeDTO.getOrgaId(), AppConfig.ITEMTYPE_ITEMTYPE, id);
       
       itemtypeDTO.setId(id);
       itemtypeService.updateItemtype(itemtypeDTO);
-      log.info("itemtype updated successfully");
+      log.info("< updateItemtype: itemtype updated successfully");
       return new ResponseEntity<>("itemtype updated successfully", HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateItemtype: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updateItemtype: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -119,22 +123,24 @@ public class ItemtypeController {
   })
   @DeleteMapping("/deleteItemtype/{id}")
   public ResponseEntity<Object> deleteItemtype(final @PathVariable long id) {
+    log.trace("> deleteItemtype: id={}", id);
+
     try {
       // Check access
       ItemtypeDTO itemtypeDTO = itemtypeService.getItemtypeById(id);
       permissionEvaluator.mayDelete(itemtypeDTO.getOrgaId(), AppConfig.ITEMTYPE_ITEMTYPE, id);
 
       itemtypeService.deleteItemtype(id);
-      log.info("itemtype deleted successfully");
+      log.info("< deleteItemtype: itemtype deleted successfully");
       return new ResponseEntity<>(String.format("itemtype id=%d deleted successfully", id), HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteItemtype: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deleteItemtype: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -148,22 +154,24 @@ public class ItemtypeController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveItemtype(final @PathVariable long id) {
+    log.trace("> retrieveItemtype: id={}", id);
+
     try {
       ItemtypeDTO itemtypeDTO = itemtypeService.getItemtypeById(id);
 
       // Check access
       permissionEvaluator.mayRead(itemtypeDTO.getOrgaId(), AppConfig.ITEMTYPE_ITEMTYPE, id);
 
-      log.info("itemtype retrieved successfully");
+      log.info("< retrieveItemtype: itemtype retrieved successfully");
       return new ResponseEntity<>(itemtypeDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveItemtype: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveItemtype: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -176,6 +184,8 @@ public class ItemtypeController {
   })
   @GetMapping("/by-orgaid/{orgaid}")
   public ResponseEntity<Object> retrieveAllItemtypes(final @PathVariable long orgaid) {
+    log.trace("> retrieveAllItemtypes: orgaid={}", orgaid);
+
     try {
       List<ItemtypeDTO> itemtypeDTOs = itemtypeService.getAllItemtypes();
 
@@ -190,10 +200,10 @@ public class ItemtypeController {
         }
       }
       
-      log.info("Itemtypes retrieved successfully");
+      log.info("< retrieveAllItemtypes: Itemtypes retrieved successfully");
       return new ResponseEntity<>(itemtypeAllowed, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllItemtypes: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

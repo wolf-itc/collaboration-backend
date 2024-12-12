@@ -20,6 +20,9 @@ import com.collaboration.model.AuthorityRepository;
 import com.collaboration.model.User;
 import com.collaboration.model.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class AuthorityService {
 
@@ -33,26 +36,35 @@ public class AuthorityService {
     }
 
     public AuthorityDTO createAuthority(final AuthorityDTO authority) throws CollaborationException {
+      log.trace("> createAuthority");
+
       User user = userRepository.findByUsername(authority.getUsername()).stream().findFirst().orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
       Authority newAuthority = convertFromDTO(authority);
       newAuthority.setId(user.getId());
       
+      log.trace("< createAuthority");
       return convertToDTO(authorityRepository.save(newAuthority));
     }
 
     public AuthorityDTO updateAuthority(final AuthorityDTO authority) throws CollaborationException {
+      log.trace("> updateAuthority");
+
       // Check if exists
       authorityRepository.findById(authority.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
       
+      log.trace("< updateAuthority");
       return convertToDTO(authorityRepository.save(convertFromDTO(authority)));
     }
 
     public void deleteAuthority(final long id) throws CollaborationException {
+      log.trace("> deleteAuthority");
+
       // Check if exists
       authorityRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
       
       authorityRepository.deleteById(id);
+      log.trace("< deleteAuthority");
     }
 
     public List<AuthorityDTO> getAllAuthorities() {

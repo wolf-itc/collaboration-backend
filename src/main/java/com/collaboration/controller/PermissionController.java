@@ -64,6 +64,8 @@ public class PermissionController {
   })
   @PostMapping
   public ResponseEntity<Object> createPermission(@RequestBody PermissionDTO permissionDTO) {
+    log.trace("> createPermission: permissionDTO={}", permissionDTO);
+
     try {
       // Check access
       // First, get the orga from the role
@@ -71,16 +73,16 @@ public class PermissionController {
       permissionEvaluator.mayCreate(orgaId, AppConfig.ITEMTYPE_PERMISSION);
       
       permissionDTO = permissionService.createPermission(permissionDTO);
-      log.info("ok");
+      log.trace("< createPermission: ok");
       return new ResponseEntity<>(permissionDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createPermission: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createPermission: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -94,6 +96,8 @@ public class PermissionController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updatePermission(final @PathVariable long id, @RequestBody PermissionDTO permissionDTO) {
+    log.trace("> updatePermission: id={} permissionDTO={}", id, permissionDTO);
+
     try {
       // Check access
       // First, get the orga from the role
@@ -102,16 +106,16 @@ public class PermissionController {
       
       permissionDTO.setId(id);
       PermissionDTO newPermissionDTO = permissionService.updatePermission(permissionDTO);
-      log.info("ok");
+      log.trace("< updatePermission: ok");
       return new ResponseEntity<>(newPermissionDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updatePermission: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updatePermission: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -125,6 +129,8 @@ public class PermissionController {
   })
   @DeleteMapping("/{id}")
   public ResponseEntity<Object> deletePermission(final @PathVariable long id) {
+    log.trace("> deletePermission: id={}", id);
+
     try {
       PermissionDTO permissionDTO = permissionService.getPermissionById(id);
 
@@ -134,16 +140,16 @@ public class PermissionController {
       permissionEvaluator.mayDelete(orgaId, AppConfig.ITEMTYPE_PERMISSION, id);
 
       permissionService.deletePermission(id);
-      log.info("ok");
+      log.trace("< deletePermission: ok");
       return new ResponseEntity<>(String.format("Permission id=%d deleted successfully", id), HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deletePermission: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deletePermission: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -157,6 +163,8 @@ public class PermissionController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrievePermission(final @PathVariable long id) {
+    log.trace("> retrievePermission: id={}", id);
+
     try {
       PermissionDTO permissionDTO = permissionService.getPermissionById(id);
 
@@ -165,16 +173,16 @@ public class PermissionController {
       var orgaId = roleService.getRoleById(permissionDTO.getRoleId()).getOrgaId();
       permissionEvaluator.mayRead(orgaId, AppConfig.ITEMTYPE_PERMISSION, id);
 
-      log.info("ok");
+      log.trace("< retrievePermission: ok");
       return new ResponseEntity<>(permissionDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrievePermission: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrievePermission: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -188,21 +196,23 @@ public class PermissionController {
   })
   @GetMapping("/by-orgaid/{orgaid}")
   public ResponseEntity<Object> retrieveAllPermissions(final @PathVariable long orgaid) {
+    log.trace("> retrieveAllPermissions: orgaid={}", orgaid);
+
     try {
       // Check access
       permissionEvaluator.mayRead(orgaid, AppConfig.ITEMTYPE_PERMISSION, null);
       
       List<PermissionDTO> permissions = permissionService.getAllPermissionsByOrgaId(orgaid);
-      log.info("ok");
+      log.trace("< retrieveAllPermissions: ok");
       return new ResponseEntity<>(permissions, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllPermissions: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllPermissions: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

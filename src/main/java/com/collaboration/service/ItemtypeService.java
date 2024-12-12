@@ -18,6 +18,9 @@ import com.collaboration.model.Itemtype;
 import com.collaboration.model.ItemtypeDTO;
 import com.collaboration.model.ItemtypeRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class ItemtypeService {
 
@@ -30,24 +33,35 @@ public class ItemtypeService {
   }
 
   public ItemtypeDTO createItemtype(ItemtypeDTO itemtypeDTO) {
+    log.trace("> createItemtype");
+
     Itemtype itemtype = convertFromDTO(itemtypeDTO);
     itemtypeRepository.save(itemtype);
     
+    log.trace("< createItemtype");
     return convertToDTO(itemtype);
   }
 
   public void updateItemtype(final ItemtypeDTO itemtypeDTO) throws CollaborationException {
+    log.trace("> updateItemtype");
+
     // Check if exists
     itemtypeRepository.findById(itemtypeDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
 
     itemtypeRepository.save(convertFromDTO(itemtypeDTO));
+
+    log.trace("< updateItemtype");
   }
 
   public void deleteItemtype(final long id) throws CollaborationException {
+    log.trace("> deleteItemtype");
+
     // Check if exists
     itemtypeRepository.findById(id).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
     
     itemtypeRepository.deleteById(id);
+
+    log.trace("< deleteItemtype");
   }
 
   public List<ItemtypeDTO> getAllItemtypes() {

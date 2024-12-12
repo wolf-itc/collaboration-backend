@@ -61,21 +61,23 @@ public class NonuserController {
   })
   @PostMapping
   public ResponseEntity<Object> createNonuser(@RequestBody NonuserDTO nonuserDTO) {
+    log.trace("> createNonuser: nonuserDTO={}", nonuserDTO);
+
     try {
       // Check access
       permissionEvaluator.mayCreate(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId());
       
       nonuserDTO = nonuserService.createNonuser(nonuserDTO);
-      log.info("Nonuser created successfully");
+      log.info("< createNonuser: Nonuser created successfully");
       return new ResponseEntity<>(nonuserDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createNonuser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createNonuser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -89,6 +91,8 @@ public class NonuserController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateNonuser(final @PathVariable long id, @RequestBody NonuserDTO nonuserDTO) {
+    log.trace("> updateNonuser: id={} nonuserDTO={}", id, nonuserDTO);
+
     try {
       // Check access
       NonuserDTO currentNonuserDTO = nonuserService.getNonuserById(id);
@@ -96,16 +100,16 @@ public class NonuserController {
       
       nonuserDTO.setId(id);
       nonuserDTO = nonuserService.updateNonuser(nonuserDTO);
-      log.info("Nonuser updated successfully");
+      log.info("< updateNonuser: Nonuser updated successfully");
       return new ResponseEntity<>(nonuserDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateNonuser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updateNonuser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -119,22 +123,24 @@ public class NonuserController {
   })
   @DeleteMapping("/{id}")
   public ResponseEntity<Object> deleteNonuser(@PathVariable long id) {
+    log.trace("> deleteNonuser: id={}", id);
+
     try {
       // Check access
       NonuserDTO nonuserDTO = nonuserService.getNonuserById(id);
       permissionEvaluator.mayDelete(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId(), id);
 
       nonuserService.deleteNonuser(id);
-      log.info("Nonuser deleted successfully");
+      log.info("< deleteNonuser: Nonuser deleted successfully");
       return new ResponseEntity<>("Nonuser deleted successfully", HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteNonuser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deleteNonuser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -148,22 +154,24 @@ public class NonuserController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveNonuser(final @PathVariable long id) {
+    log.trace("> retrieveNonuser: id={}", id);
+
     try {
       NonuserDTO nonuserDTO = nonuserService.getNonuserById(id);
 
       // Check access
       permissionEvaluator.mayRead(nonuserDTO.getOrgaId(), nonuserDTO.getItemtypeId(), id);
 
-      log.info("Nonuser retrieved successfully");
+      log.info("< retrieveNonuser: Nonuser retrieved successfully");
       return new ResponseEntity<>(nonuserDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveNonuser: error={}", e.getMessage(), e);
       if (e.getExceptionReason() == CollaborationExceptionReason.ACCESS_DENIED) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
       }
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveNonuser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -176,6 +184,8 @@ public class NonuserController {
   })
   @GetMapping("/by-orgaid/{orgaid}")
   public ResponseEntity<Object> retrieveAllNonusers(@Parameter(description = "The orgaId here is not the orgaId in the nonuser itself, it is the orgaId connected over item2orga") final @PathVariable long orgaid) {
+    log.trace("> retrieveAllNonusers: orgaid={}", orgaid);
+
     try {
       List<NonuserDTO> nonuserDTOs = nonuserService.getAllNonusersByOrgaId(orgaid);
 
@@ -190,10 +200,10 @@ public class NonuserController {
         }
       }
       
-      log.info("Nonusers retrieved successfully");
+      log.info("< retrieveAllNonusers: Nonusers retrieved successfully");
       return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllNonusers: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -206,6 +216,8 @@ public class NonuserController {
   })
   @GetMapping("/by-name/{name}")
   public ResponseEntity<Object> retrieveNonusersByName(@PathVariable String name) {
+    log.trace("> retrieveNonusersByName: name={}", name);
+
     try {
       List<NonuserDTO> nonuserDTOs = nonuserService.getNonusersByName(name);
 
@@ -218,10 +230,10 @@ public class NonuserController {
         } catch ( Exception ex ) {}
       }
       
-      log.info("Nonusers retrieved for name: {}", name);
+      log.info("< retrieveNonusersByName: Nonusers retrieved for name: {}", name);
       return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveNonusersByName: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -234,6 +246,8 @@ public class NonuserController {
   })
   @GetMapping("/by-userId/{userId}")
   public ResponseEntity<Object> retrieveNonusersByuserId(@PathVariable int userId) {
+    log.trace("> retrieveNonusersByuserId: userId={}", userId);
+
     try {
       List<NonuserDTO> nonuserDTOs = nonuserService.getNonusersByuserId(userId);
 
@@ -246,10 +260,10 @@ public class NonuserController {
         } catch ( Exception ex ) {}
       }
       
-      log.info("Nonusers retrieved for userId: {}", userId);
+      log.info("< retrieveNonusersByuserId: Nonusers retrieved for userId: {}", userId);
       return new ResponseEntity<>(nonusersAllowed, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveNonusersByuserId: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

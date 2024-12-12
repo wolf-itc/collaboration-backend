@@ -30,7 +30,8 @@ public class EmailServiceImpl {
   }
 
   public void sendSimpleMessage( String to, String subject, String text) {
-
+    log.trace("> sendSimpleMessage to={} subject={} text={}", to, subject, text);
+    
     try {
       MimeMessage message = mailSender.createMimeMessage();
       message.setSubject(subject);
@@ -40,9 +41,9 @@ public class EmailServiceImpl {
       helper.setTo(to);
       helper.setText(text,true);
       mailSender.send(message);
-      log.info("eMail has been sent.");
+      log.trace("< sendSimpleMessage: eMail has been sent");
     } catch (MessagingException ex) {
-      log.error( ex.getMessage());
+      log.error("< sendSimpleMessage: ERROR! {}", ex.getMessage(), ex);
     }
   }
 }

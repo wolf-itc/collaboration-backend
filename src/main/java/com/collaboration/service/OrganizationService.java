@@ -21,6 +21,9 @@ import com.collaboration.model.OrganizationDTO;
 import com.collaboration.model.OrganizationRepository;
 import com.collaboration.model.RoleDTO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class OrganizationService {
 
@@ -35,6 +38,8 @@ public class OrganizationService {
   }
 
   public OrganizationDTO createOrganization(final OrganizationDTO organizationDTO) throws CollaborationException {
+    log.trace("> createOrganization");
+
     organizationDTO.setId(0);
     var organization = organizationRepository.save(convertFromDTO(organizationDTO));
     
@@ -46,21 +51,29 @@ public class OrganizationService {
     roleDTO = new RoleDTO(0L, organization.getId(), "GUEST");
     roleService.createRole(roleDTO);
 
+    log.trace("< createOrganization");
     return convertToDTO(organization);
   }
 
   public OrganizationDTO updateOrganization(final OrganizationDTO organization) throws CollaborationException {
+    log.trace("> updateOrganization");
+
     // Check if exists
     getOrganizationById(organization.getId());
     
+    log.trace("< updateOrganization");
     return convertToDTO(organizationRepository.save(convertFromDTO(organization)));
   }
 
   public void deleteOrganization(final long id) throws CollaborationException {
+    log.trace("> deleteOrganization");
+
     // Check if exists
     getOrganizationById(id);
     
     organizationRepository.deleteById(id);
+
+    log.trace("< deleteOrganization");
   }
 
   public OrganizationDTO getOrganizationById(final long id) throws CollaborationException {
@@ -73,20 +86,28 @@ public class OrganizationService {
   }
   
   private OrganizationDTO convertToDTO(final Organization organization) {
+    log.trace("> convertToDTO");
+
     OrganizationDTO organizationDTO = modelMapper.map(organization, OrganizationDTO.class);
     if (organization.getLogo() != null) {
       String base64Logo = Base64.getEncoder().encodeToString(organization.getLogo());
       organizationDTO.setLogo(base64Logo);
     }
+
+    log.trace("< convertToDTO");
     return organizationDTO;
   }
   
   private Organization convertFromDTO(final OrganizationDTO organizationDTO) {
-      Organization organization = modelMapper.map(organizationDTO, Organization.class);
-      if (StringUtils.isNotBlank(organizationDTO.getLogo())) {
-        byte[] decodedBytes = Base64.getDecoder().decode(organizationDTO.getLogo());
-        organization.setLogo(decodedBytes);
-      }
-      return organization;
+    log.trace("> convertFromDTO");
+
+    Organization organization = modelMapper.map(organizationDTO, Organization.class);
+    if (StringUtils.isNotBlank(organizationDTO.getLogo())) {
+      byte[] decodedBytes = Base64.getDecoder().decode(organizationDTO.getLogo());
+      organization.setLogo(decodedBytes);
+    }
+
+    log.trace("< convertFromDTO");
+    return organization;
   }
 }

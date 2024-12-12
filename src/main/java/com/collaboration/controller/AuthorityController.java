@@ -56,15 +56,17 @@ public class AuthorityController {
   })
   @PostMapping
   public ResponseEntity<Object> createAuthority(@RequestBody AuthorityDTO authorityDTO) {
+    log.trace("> createAuthority: authorityDTO={}", authorityDTO);
+
     try {
       authorityDTO = authorityService.createAuthority(authorityDTO);
-      log.info("ok");
+      log.trace("< createAuthority: ok");
       return new ResponseEntity<>(authorityDTO, HttpStatus.CREATED);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< createAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< createAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -78,16 +80,18 @@ public class AuthorityController {
   })
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateAuthority(final @PathVariable long id, @RequestBody AuthorityDTO authorityDTO) {
+    log.trace("> updateAuthority: id={} authorityDTO={}", id, authorityDTO);
+
     try {
       authorityDTO.setId(id);
       authorityDTO = authorityService.updateAuthority(authorityDTO);
-      log.info("ok");
+      log.trace("< updateAuthority: ok");
       return new ResponseEntity<>(authorityDTO, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< updateAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< updateAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -101,15 +105,17 @@ public class AuthorityController {
   })
   @DeleteMapping("/deleteAuthority/{id}")
   public ResponseEntity<Object> deleteAuthority(final @PathVariable long id) {
+    log.trace("> deleteAuthority: id={}", id);
+
     try {
       authorityService.deleteAuthority(id);
-      log.info("ok");
+      log.trace("< deleteAuthority: ok");
       return new ResponseEntity<>(String.format("Authority id=%d deleted successfully", id), HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< deleteAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< deleteAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -123,15 +129,17 @@ public class AuthorityController {
   })
   @GetMapping("/{id}")
   public ResponseEntity<Object> retrieveAuthority(final @PathVariable long id) {
+    log.trace("> retrieveAuthority: id={}", id);
+
     try {
       AuthorityDTO authority = authorityService.getAuthorityById(id);
-      log.info("ok");
+      log.trace("< retrieveAuthority: ok");
       return new ResponseEntity<>(authority, HttpStatus.OK);
     } catch (CollaborationException e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAuthority: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -144,12 +152,14 @@ public class AuthorityController {
   })
   @GetMapping("/by-userid/{userid}")
   public ResponseEntity<Object> retrieveAllRolesForUser(final @PathVariable long userid) {
+    log.trace("> retrieveAllRolesForUser: userid={}", userid);
+
     try {
       List<AuthorityDTO> authorities = authorityService.getAuthoritiesByUserId(userid);
-      log.info("ok");
+      log.trace("< retrieveAllRolesForUser: ok");
       return new ResponseEntity<>(authorities, HttpStatus.OK);
     } catch (Exception e) {
-      log.error(e.getMessage());
+      log.error("< retrieveAllRolesForUser: error={}", e.getMessage(), e);
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

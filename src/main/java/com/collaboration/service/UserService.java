@@ -30,6 +30,9 @@ import com.collaboration.model.User;
 import com.collaboration.model.UserDTO;
 import com.collaboration.model.UserRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class UserService {
 
@@ -58,6 +61,8 @@ public class UserService {
   }
 
   public UserDTO createUser(final UserDTO userDTO) throws CollaborationException {
+    log.trace("> createUser");
+
     // Check if exists
     var userCheck = userRepository.findByUsername(userDTO.getUsername());
     if (!userCheck.isEmpty()) {
@@ -94,10 +99,13 @@ public class UserService {
     
     item = itemService.createItem(item);
 
+    log.trace("< createUser");
     return convertToDTO(user);
   }
 
   public UserDTO updateUser(final UserDTO user) throws CollaborationException {
+    log.trace("> updateUser");
+
     // Retrieve current user
     var currentUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
@@ -123,11 +131,14 @@ public class UserService {
     user.setEnabled(true);
     userRepository.save(convertFromDTO(user));
     
+    log.trace("< updateUser");
     return user;
   }
 
   // TODO: Really hard deletion?
   public UserDTO deleteAccount(final String activationKey) throws CollaborationException {
+    log.trace("> deleteAccount");
+
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
@@ -139,6 +150,7 @@ public class UserService {
     // Then the user itself
     userRepository.deleteById(user.getId());
     
+    log.trace("< deleteAccount");
     return convertToDTO(user);
   }
 
@@ -159,6 +171,8 @@ public class UserService {
   }
 
   public UserDTO doLogin(final UserDTO userDTO) throws CollaborationException {
+    log.trace("> doLogin");
+
     var user = userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
     if (!passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
@@ -189,10 +203,13 @@ public class UserService {
     user.setLastLogin(OffsetDateTime.now(ZoneOffset.UTC));
     userRepository.save(user);
 
+    log.trace("< doLogin");
     return convertToDTO(user);
   }
 
   public void activateAccount(final String activationKey) throws CollaborationException {
+    log.trace("> activateAccount");
+
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
@@ -203,9 +220,13 @@ public class UserService {
       user.setActivationkey(activationKey);
       userRepository.save(user);
     }
+
+    log.trace("< activateAccount");
   }
 
   public String resetPassword(final String activationKey) throws CollaborationException {
+    log.trace("> resetPassword");
+
     // Check if exists
     var user = userRepository.findByActivationkey(activationKey).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
@@ -215,18 +236,25 @@ public class UserService {
     user.setPassword(enc);
     userRepository.save(user);
 
+    log.trace("< resetPassword");
     return tempPassword;
   }
 
   public void preparePasswordReset(final UserDTO user) throws CollaborationException {
+    log.trace("> preparePasswordReset");
+
     // Check if exists
     var foundUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.INVALID_ACTIVATIONKEY));
 
     foundUser.setActivationkey(user.getActivationkey());
     userRepository.save(foundUser);
+
+    log.trace("< preparePasswordReset");
   }
 
   public void changePassword(final UserDTO user) throws CollaborationException {
+    log.trace("> changePassword");
+
     // Check if exists
     var oldUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
 
@@ -236,11 +264,17 @@ public class UserService {
 
     oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
     userRepository.save(oldUser);
+
+    log.trace("< changePassword");
   }
 
   public long getCurrentUserId() throws CollaborationException {
+    log.trace("> getCurrentUserId");
+
     var username = SecurityContextHolder.getContext().getAuthentication().getName();
     var user = getUserByUsername(username);
+
+    log.trace("< getCurrentUserId");
     return user.getId();
   }
 
@@ -253,15 +287,21 @@ public class UserService {
   }
 
   public void joinOrganization(final UserDTO userDTO) throws CollaborationException {
+    log.trace("> joinOrganization");
+
     // Check if exists
     userRepository.findByUsername(userDTO.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.NOT_FOUND));
     
     // Insert the link to orga
     var item2orga = new Item2Orga(0, userDTO.getId(), userDTO.getOrgaId());
     item2OrgaRepository.save(item2orga);
+
+    log.trace("< joinOrganization");
   }
 
   private String generateTempPassword() {
+    log.trace("> generateTempPassword");
+
     int leftLimit = 48; // numeral '0'
     int rightLimit = 122; // letter 'z'
     int targetStringLength = 16;
@@ -273,6 +313,7 @@ public class UserService {
         .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
         .toString();
 
+    log.trace("< generateTempPassword");
     return generatedString;
   }
 
