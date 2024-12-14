@@ -1,19 +1,27 @@
+/**
+ *  DataSourceConfigTest
+ *
+ *  @author Martin Wolf
+ *  
+ *  (C) 2024 Claus Hansen & Martin Wolf IT-Consulting (www.wolf-itc.de)
+ * ***************************************************************************/
 package com.collaboration.config;
 
-import com.zaxxer.hikari.HikariDataSource;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.zaxxer.hikari.HikariDataSource;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -23,7 +31,6 @@ public class DataSourceConfigTest {
     private DataSourceProperties dataSourceProperties;
 
     @Autowired
-    @Qualifier("postgresDB")
     private DataSource dataSource;
 
     @Test

@@ -13,18 +13,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 
+@Profile("!test")
 @Configuration
 public class DataSourceConfig {
-
-    /* This would need: spring.datasource.h2.jdbc-url=jdbc:h2:mem:xxx in application.properties
-    @Bean(name = "h2DB")
-    @ConfigurationProperties(prefix = "spring.datasource.h2")
-    public DataSource getDataSource() {
-        DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
-        return dataSourceBuilder.build();
-    }
-    */
 
     @Bean
     @Primary
@@ -38,19 +31,4 @@ public class DataSourceConfig {
     public HikariDataSource getDataSource(DataSourceProperties dataSourceProperties) {
         return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
     }
-
-/*
-    @Bean
-    @Primary
-    @ConfigurationProperties("spring.datasource.h2")
-    public DataSourceProperties dataSourceProperties() {
-        return new DataSourceProperties();
-    }
-
-    @Bean(name = "h2DB")
-    @ConfigurationProperties(prefix = "spring.datasource.h2.config")
-    public HikariDataSource getDataSource(DataSourceProperties dataSourceProperties) {
-        return dataSourceProperties.initializeDataSourceBuilder().type(HikariDataSource.class).build();
-    }
-*/
 }

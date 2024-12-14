@@ -124,7 +124,7 @@
 
 	<changeSet author="mw" id="mw-01-004">
 		<sql>
-			INSERT INTO organization VALUES (1, 'Yare', 'Real Collaboration', null,	null);
+			INSERT INTO organization VALUES (1, 'Yare', 'Real Collaboration', null);
 		</sql>
 	</changeSet>
 
@@ -152,7 +152,7 @@
 	  />
 	</changeSet>
 
-	<changeSet author="mw" id="mw-01-006">
+	<changeSet author="mw" id="mw-01-006" dbms="postgresql">
 		<sql>
       INSERT INTO itemtype VALUES (1, 1, 'USER');
 			INSERT INTO itemtype VALUES (2, 1, 'ROLE');
@@ -204,7 +204,7 @@
 		/>
 	</changeSet>
 
-  <changeSet author="mw" id="mw-01-008">
+  <changeSet author="mw" id="mw-01-008" dbms="postgresql">
     <sql>
       INSERT INTO role VALUES (1, 1, 'USER');
       INSERT INTO role VALUES (2, 1, 'ADMIN');
@@ -286,12 +286,11 @@
   <changeSet author="mw" id="mw-01-012">
     <sql>
       INSERT INTO permission VALUES (1, 1, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 2, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 3, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 4, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 5, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 6, null, 3, 'CRUD');
-      INSERT INTO permission VALUES (1, 7, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (2, 2, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (3, 3, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (4, 4, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (5, 5, null, 3, 'CRUD');
+      INSERT INTO permission VALUES (6, 6, null, 3, 'CRUD');
       SELECT setval('permission_id_seq', 1000, false);
     </sql>
   </changeSet>
