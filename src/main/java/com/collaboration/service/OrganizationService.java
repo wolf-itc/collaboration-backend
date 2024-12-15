@@ -55,14 +55,14 @@ public class OrganizationService {
     return convertToDTO(organization);
   }
 
-  public OrganizationDTO updateOrganization(final OrganizationDTO organization) throws CollaborationException {
+  public OrganizationDTO updateOrganization(final OrganizationDTO organizationDTO) throws CollaborationException {
     log.trace("> updateOrganization");
 
     // Check if exists
-    getOrganizationById(organization.getId());
+    getOrganizationById(organizationDTO.getId());
     
     log.trace("< updateOrganization");
-    return convertToDTO(organizationRepository.save(convertFromDTO(organization)));
+    return convertToDTO(organizationRepository.save(convertFromDTO(organizationDTO)));
   }
 
   public void deleteOrganization(final long id) throws CollaborationException {

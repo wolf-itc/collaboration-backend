@@ -103,36 +103,38 @@ public class UserService {
     return convertToDTO(user);
   }
 
-  public UserDTO updateUser(final UserDTO user) throws CollaborationException {
+  public UserDTO updateUser(final UserDTO userDTO) throws CollaborationException {
     log.trace("> updateUser");
 
-    // Retrieve current user
-    var currentUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
-
-    // Verify that username is unique
     Optional<User> maybeExistingOtherUser = Optional.empty();
-    if (!user.getCurrentUsername().equals(user.getUsername())) {
-      maybeExistingOtherUser = userRepository.findByUsername(user.getUsername());
-    }
-    if (!maybeExistingOtherUser.isEmpty()) {
-      throw new CollaborationException(CollaborationException.CollaborationExceptionReason.USERNAME_ALREADY_EXISTS);
+
+    // Retrieve current user
+    var currentUser = userRepository.findById(userDTO.getId()).orElseThrow(() -> new CollaborationException(CollaborationException.CollaborationExceptionReason.UNKNOWN_USERNAME));
+    if (currentUser.getUsername() != userDTO.getUsername()) {
+      // Verify that username is unique
+      maybeExistingOtherUser = userRepository.findByUsername(userDTO.getUsername());
+      if (!maybeExistingOtherUser.isEmpty()) {
+        throw new CollaborationException(CollaborationException.CollaborationExceptionReason.USERNAME_ALREADY_EXISTS);
+      }
     }
 
-    // Verify that eMail is unique
-    maybeExistingOtherUser = userRepository.findByEmail(user.getEmail());
-    if (maybeExistingOtherUser.stream().filter(u -> u.getId() != currentUser.getId()).count() > 0) {
-      throw new CollaborationException(CollaborationException.CollaborationExceptionReason.EMAIL_ALREADY_EXISTS);
+    if (currentUser.getEmail() != userDTO.getEmail()) {
+      // Verify that eMail is unique
+      maybeExistingOtherUser = userRepository.findByEmail(userDTO.getEmail());
+      if (maybeExistingOtherUser.stream().filter(u -> u.getId() != currentUser.getId()).count() > 0) {
+        throw new CollaborationException(CollaborationException.CollaborationExceptionReason.EMAIL_ALREADY_EXISTS);
+      }
     }
 
     // These 4 fields cannot be set by the user. They are handles by the application
-    user.setPassword(currentUser.getPassword());
-    user.setLastLogin(currentUser.getLastLogin());
-    user.setLastNotifications(currentUser.getLastNotifications());
-    user.setEnabled(true);
-    userRepository.save(convertFromDTO(user));
+    userDTO.setPassword(currentUser.getPassword());
+    userDTO.setLastLogin(currentUser.getLastLogin());
+    userDTO.setLastNotifications(currentUser.getLastNotifications());
+    userDTO.setEnabled(true);
+    userRepository.save(convertFromDTO(userDTO));
     
     log.trace("< updateUser");
-    return user;
+    return userDTO;
   }
 
   // TODO: Really hard deletion?

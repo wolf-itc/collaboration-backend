@@ -1,6 +1,8 @@
 /**
  *  UserRepositoryTest
  *  
+ *  DataJpaTest will not run as TestNG because repositories get not injected
+ *
  *  @author Martin Wolf
  *  
  *  (C) 2024 Claus Hansen & Martin Wolf IT-Consulting (www.wolf-itc.de)
@@ -11,7 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Optional;
+
+import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,12 +32,20 @@ public class UserRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private DataSource dataSource;
+    
     private String testUsername;
     private String testEmail;
     private String testActivationKey;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws SQLException {
+        // Ensure H2
+        Connection connection = dataSource.getConnection();
+        String driverName = connection.getMetaData().getDriverName();
+        assertTrue(driverName.toUpperCase().contains("H2"));
+  
         // Set up test data
         testUsername = "testUser";
         testEmail = "testuser@example.com";

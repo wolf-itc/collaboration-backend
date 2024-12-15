@@ -1,6 +1,8 @@
 /**
  *  RoleRepositoryTest
  *  
+ *  DataJpaTest will not run as TestNG because repositories get not injected
+ *
  *  @author Martin Wolf
  *  
  *  (C) 2024 Claus Hansen & Martin Wolf IT-Consulting (www.wolf-itc.de)

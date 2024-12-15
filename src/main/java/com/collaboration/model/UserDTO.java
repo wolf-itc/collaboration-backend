@@ -36,7 +36,6 @@ public class UserDTO {
     private boolean showContact;
     private String language;
     private String activationkey;
-    private String currentUsername;
     private String oldPassword;
     private String mailSubject;
     private String mailBody;

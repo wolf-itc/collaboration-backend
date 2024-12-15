@@ -80,17 +80,6 @@
         <artifactId>h2</artifactId>
         <scope>test</scope>
     </dependency>
-    <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>org.testng</groupId>
-        <artifactId>testng</artifactId>
-        <version>7.4.0</version> <!-- oder die neueste Version -->
-        <scope>test</scope>
-    </dependency>
   </dependencies>
 
     <build>
@@ -99,12 +88,6 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
-<!--
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-surefire-plugin</artifactId>
-          </plugin>
--->
         </plugins>
     </build>
 
